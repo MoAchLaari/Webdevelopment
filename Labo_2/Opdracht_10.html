@@ -5,36 +5,43 @@
     <title>Opdracht 10</title>
 </head>
 <body>
-<h2>Opdracht 10</h2>
-<p>Foute versie:</p>
+<h2>Foutieve lijst (voorbeeld)</h2>
 <pre>
+&lt;ul&gt;
+  &lt;li&gt;een&lt;/li&gt;
+  &lt;li&gt;twee&lt;/li&gt;
+  &lt;ol&gt;
+    &lt;li&gt;jan&lt;/li&gt;
+    &lt;li&gt;piet&lt;/li&gt;
+    &lt;li&gt;joris&lt;/li&gt;
+  &lt;/ol&gt;
+  &lt;li&gt;vier&lt;/li&gt;
+&lt;/ul&gt;
+  </pre>
+
+<h2>Correcte versie 1 – Twee aparte lijsten</h2>
 <ul>
-  <li>een</li>
-  <li>twee</li>
-  <ol>
+    <li>een</li>
+    <li>twee</li>
+    <li>vier</li>
+</ul>
+<ol>
     <li>jan</li>
     <li>piet</li>
     <li>joris</li>
-  </ol>
-  <li>vier</li>
-</ul>
-    </pre>
-<p>
-    Uitleg: Een ol mag geen directe child van een ul zijn. Corrigeer:
-    </p>
-    <pre>
+</ol>
+
+<h2>Correcte versie 2 – Geneste lijst</h2>
 <ul>
-  <li>een</li>
-  <li>twee</li>
-  <li> drie
-    <ol>
-      <li>jan</li>
-      <li>piet</li>
-      <li>joris</li>
-    </ol>
-  </li>
-  <li>vier</li>
+    <li>een</li>
+    <li>twee
+        <ol>
+            <li>jan</li>
+            <li>piet</li>
+            <li>joris</li>
+        </ol>
+    </li>
+    <li>vier</li>
 </ul>
-    </pre>
 </body>
 </html>
