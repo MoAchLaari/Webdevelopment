@@ -13,20 +13,20 @@ header {
     background: linear-gradient(135deg, #0078d4, #005fa3);
     color: white;
     text-align: center;
-    padding: 2rem 1rem;
+    padding: 1rem 0.5rem;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
 header h1 {
-    margin-bottom: 0.3rem;
-    font-size: 2.2rem;
+    margin-bottom: 0.2rem;
+    font-size: 1.6rem;
 }
 
 header h2 {
     font-weight: normal;
     color: #e3e9f3;
+    font-size: 1rem;
 }
-
 
 section {
     background: white;
