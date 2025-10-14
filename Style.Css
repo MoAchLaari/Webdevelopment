@@ -51,7 +51,7 @@ details {
 }
 
 details summary {
-    background-color: #3b82f6;
+    background-color: #FF0000;
     color: white;
     padding: 1rem 1.5rem;
     cursor: pointer;
@@ -67,7 +67,7 @@ details summary::-webkit-details-marker {
 }
 
 details[open] summary {
-    background-color: #60a5fa;
+    background-color: #FF0000;
     transform: scale(1.01);
 }
 
@@ -96,12 +96,12 @@ ol li:hover {
 
 a {
     text-decoration: none;
-    color: #1e3a8a;
+    color: #FF2C2C;
     font-weight: 500;
 }
 
 a:hover {
-    color: #3b82f6;
+    color: #FF2C2C;
 }
 
 footer {
