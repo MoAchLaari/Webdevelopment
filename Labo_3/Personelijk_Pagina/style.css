@@ -10,10 +10,10 @@ body {
 
 
 header {
-    background: linear-gradient(135deg, #0078d4, #005fa3);
+    background: linear-gradient(135deg, #FF0000, #ef3434);
     color: white;
     text-align: center;
-    padding: 1rem 0.5rem;
+    padding: 0.5rem 0.5rem;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
@@ -38,8 +38,8 @@ section {
 }
 
 section h3 {
-    color: #005fa3;
-    border-bottom: 2px solid #0078d4;
+    color: #FF2C2C;
+    border-bottom: 2px solid rgba(179, 3, 3, 0.83);
     padding-bottom: 0.4rem;
 }
 
@@ -54,13 +54,13 @@ ul {
 }
 
 a {
-    color: #0078d4;
+    color: rgba(179, 3, 3, 0.83);
     text-decoration: none;
 }
 
 a:hover {
     text-decoration: underline;
-    color: #005fa3;
+    color: rgba(179, 3, 3, 0.83);
 }
 
 
@@ -90,7 +90,7 @@ section ul img {
 
 
 footer {
-    background-color: #005fa3;
+    background-color: rgba(179, 3, 3, 0.83);
     color: white;
     text-align: center;
     padding: 1rem 0;
