@@ -36,12 +36,12 @@
     color: #222;
     font-weight: bold;
 }
-/* Weekends: apply to first (Sun) and last (Sat) child of tbody rows */
+
 .calendar tbody tr td:first-child,
 .calendar tbody tr td:last-child {
     background: rgb(255,220,220);
 }
-/* Feest overrides, so use .feest last */
+
 .calendar td.feest {
     background: rgb(250,120,120) !important;
 }
