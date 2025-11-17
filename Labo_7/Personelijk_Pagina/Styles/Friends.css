@@ -1,3 +1,46 @@
+body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: linear-gradient(120deg,#f6f8fb 75%,#ebe7ef 100%);
+    color: #333;
+    margin: 0;
+    padding: 0;
+    line-height: 1.7;
+}
+header {
+    background: linear-gradient(135deg, #FF3131 40%, #ed4977 100%);
+    color: white;
+    text-align: center;
+    padding: 1.3rem 0 0.8rem 0;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.09);
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+}
+header h1 {
+    margin-bottom: 0.18rem;
+    font-size: 2.1rem;
+    font-weight: 800;
+    text-shadow: 0 2px 6px rgba(110,14,31,0.07);
+}
+nav {
+    margin-top: 0.8rem;
+    margin-bottom: 0.6rem;
+}
+nav a {
+    color: #fff;
+    padding: 0.5em 1em;
+    margin: 0 0.4em;
+    border-radius: 18px;
+    font-weight: 600;
+    background: rgba(240,0,0,0.16);
+    text-decoration: none;
+    transition: background 0.12s, box-shadow 0.12s;
+}
+nav a:hover {
+    background: #f6d3d3;
+    color: #ef3434;
+    box-shadow: 0 0 6px #ffabab77;
+}
+
 .friends-table {
     border-collapse: collapse;
     width: 100%;
