@@ -6,7 +6,6 @@ body {
     padding: 0;
     line-height: 1.7;
 }
-
 header {
     background: linear-gradient(135deg, #FF3131 40%, #ed4977 100%);
     color: white;
@@ -16,21 +15,18 @@ header {
     border-bottom-left-radius: 10px;
     border-bottom-right-radius: 10px;
 }
-
 header h1 {
     margin-bottom: 0.18rem;
     font-size: 2.1rem;
     font-weight: 800;
     text-shadow: 0 2px 6px rgba(110,14,31,0.07);
 }
-
 header h2 {
     font-weight: 500;
     color: #f2f6fc;
     font-size: 1.3rem;
     letter-spacing: 0.05em;
 }
-
 nav {
     margin-top: 0.8rem;
     margin-bottom: 0.6rem;
@@ -50,7 +46,14 @@ nav a:hover {
     color: #ef3434;
     box-shadow: 0 0 6px #ffabab77;
 }
-
+.main-95 {
+    width: 95%;
+    margin: auto;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 22px rgba(210, 31, 41, 0.07);
+    padding: 2.2rem 2.3rem 1.8rem 2.3rem;
+}
 main {
     background: #fff;
     max-width: 900px;
@@ -105,7 +108,6 @@ figure figcaption {
     font-style: italic;
     margin-top: 0.7rem;
 }
-
 footer {
     background-color: #ed4977;
     color: white;
@@ -118,8 +120,67 @@ footer {
     border-top-left-radius: 12px;
     box-shadow: 0 -2px 13px rgba(205,49,67,0.13);
 }
+/* Nature Blog Specifics */
+.blog-container {
+    width: 95%;
+    margin: auto;
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 4px 18px rgba(70,100,100,0.07);
+    min-height: 100vh;
+}
+.blog-header {
+    padding: 0 0 1.2em 0;
+    text-align: center;
+    background: linear-gradient(90deg, #54a68d 80%, #aad9d6 100%);
+    border-radius: 18px 18px 0 0;
+}
+.header-img {
+    width: 100%;
+    max-height: 135px;
+    object-fit: cover;
+    border-radius: 18px 18px 0 0;
+    margin-bottom: 0.5em;
+    box-shadow: 0 1px 6px rgba(50,90,90,0.12);
+}
+.intro {
+    font-size: 1.1em;
+    margin-bottom: 2em;
+}
+.articles {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.6em;
+}
+article {
+    background: #f2fbf4;
+    border-radius: 10px;
+    box-shadow: 0 1px 6px #aad9d688;
+    padding: 1.2em 1em;
+}
+article h2 {
+    color: #326d58;
+    margin-top: 0;
+}
+article p {
+    margin-bottom: 0;
+    color: #245037;
+}
+/* Responsive Blog grid for mobile */
+@media (max-width: 800px) {
+    .blog-container {
+        width: 99%;
+    }
+    .articles {
+        grid-template-columns: 1fr;
+    }
+    .header-img {
+        max-height: 85px;
+    }
+}
+/* Responsive main padding */
 @media (max-width: 650px) {
-    main {
+    main, .main-95, .blog-container {
         padding: 1rem 0.4rem;
     }
     header,footer {
