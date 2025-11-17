@@ -1,4 +1,4 @@
-table.friends-table {
+.friends-table {
     border-collapse: collapse;
     width: 100%;
     background: #fff;
@@ -29,3 +29,10 @@ table.friends-table {
 .friends-table tbody .alt td { background: #F7CDCD; color: #80141C; }
 .friends-table tbody td:first-child { border-left: none; }
 .friends-table tbody tr:last-child td { border-bottom: none; }
+/* This styles unknown cells, both in odd and even rows */
+.friends-table td.unknown,
+.friends-table .alt td.unknown {
+    background-color: red;
+    color: #fff;
+    font-weight: bold;
+}
