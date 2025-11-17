@@ -86,15 +86,6 @@ main {
     color: #222;
     margin-bottom: 0.6em;
 }
-.more-link {
-    font-size: 0.95em;
-    color: #004bad;
-    text-decoration: underline;
-}
-.more-link:hover {
-    color: #FF3131;
-    text-decoration: underline;
-}
 
 footer {
     padding: 0.6em 1em 1em 1em;
