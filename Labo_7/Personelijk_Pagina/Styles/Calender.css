@@ -1,0 +1,47 @@
+.calendar {
+    border-collapse: collapse;
+    margin: 24px auto;
+    width: 320px;
+    box-shadow: 0 2px 18px #2222;
+    font-family: Arial, sans-serif;
+}
+.month-head {
+    background: rgb(170,170,200);
+    color: rgb(200,190,240);
+    font-size: 1.25em;
+    font-weight: bold;
+    text-align: center;
+}
+.calendar th {
+    background: rgb(35,37,70);
+    color: rgb(200,190,240);
+    padding: 6px 0;
+    font-size: 1em;
+}
+.calendar td {
+    width: 32px;
+    height: 32px;
+    text-align: center;
+    border: 1px solid #aaa;
+    font-size: 1em;
+    background: #fff;
+}
+.calendar td.other,
+.calendar td.next {
+    background: #ddd !important;
+    color: #bbb;
+}
+.calendar td.feest {
+    background: rgb(250,120,120);
+    color: #222;
+    font-weight: bold;
+}
+/* Weekends: apply to first (Sun) and last (Sat) child of tbody rows */
+.calendar tbody tr td:first-child,
+.calendar tbody tr td:last-child {
+    background: rgb(255,220,220);
+}
+/* Feest overrides, so use .feest last */
+.calendar td.feest {
+    background: rgb(250,120,120) !important;
+}

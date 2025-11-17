@@ -1,47 +1,4 @@
-body {
-    font-family: "Segoe UI", Arial, sans-serif;
-    background: linear-gradient(120deg,#f6f8fb 75%,#ebe7ef 100%);
-    color: #333;
-    margin: 0;
-    padding: 0;
-    line-height: 1.7;
-}
-header {
-    background: linear-gradient(135deg, #FF3131 40%, #ed4977 100%);
-    color: white;
-    text-align: center;
-    padding: 1.3rem 0 0.8rem 0;
-    box-shadow: 0 3px 12px rgba(0,0,0,0.09);
-    border-bottom-left-radius: 10px;
-    border-bottom-right-radius: 10px;
-}
-header h1 {
-    margin-bottom: 0.18rem;
-    font-size: 2.1rem;
-    font-weight: 800;
-    text-shadow: 0 2px 6px rgba(110,14,31,0.07);
-}
-nav {
-    margin-top: 0.8rem;
-    margin-bottom: 0.6rem;
-}
-nav a {
-    color: #fff;
-    padding: 0.5em 1em;
-    margin: 0 0.4em;
-    border-radius: 18px;
-    font-weight: 600;
-    background: rgba(240,0,0,0.16);
-    text-decoration: none;
-    transition: background 0.12s, box-shadow 0.12s;
-}
-nav a:hover {
-    background: #f6d3d3;
-    color: #ef3434;
-    box-shadow: 0 0 6px #ffabab77;
-}
-
-.friends-table {
+/*.friends-table {
     border-collapse: collapse;
     width: 100%;
     background: #fff;
@@ -72,10 +29,76 @@ nav a:hover {
 .friends-table tbody .alt td { background: #F7CDCD; color: #80141C; }
 .friends-table tbody td:first-child { border-left: none; }
 .friends-table tbody tr:last-child td { border-bottom: none; }
-/* This styles unknown cells, both in odd and even rows */
+
 .friends-table td.unknown,
 .friends-table .alt td.unknown {
     background-color: red;
     color: #fff;
     font-weight: bold;
+} */
+
+.table-wrap {
+    width: 100%;
+    overflow-x: auto;
 }
+.friends-table {
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+    min-width: 400px;
+    background: #fff;
+    box-shadow: 0 4px 24px #99182122;
+    margin-bottom: 2em;
+    border-radius: 14px;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    caption-side: top;
+    transition: box-shadow 0.2s;
+}
+.friends-table thead th {
+    background: linear-gradient(90deg,#b71f25 5%,#e86070 90%);
+    color: #fff;
+    font-size: 1.09em;
+    font-weight: bold;
+    padding: 13px 10px;
+    border: none;
+    border-top-left-radius: 14px;
+    border-top-right-radius: 14px;
+    position: sticky;
+    top:0;
+    z-index:2;
+}
+.friends-table thead th:first-child { border-left: none; }
+.friends-table th, .friends-table td {
+    padding: 12px 8px;
+    text-align: left;
+    border-bottom: 1.5px solid #e6d6d6;
+}
+.friends-table tbody tr {
+    transition: background 0.17s;
+}
+.friends-table tbody tr:hover {
+    background: #ffeeee;
+}
+.friends-table tbody td {
+    color: #80141C;
+    font-size: 1em;
+    font-weight: 400;
+    border-left: 3px solid #fbe1e5;
+    background: transparent;
+}
+.friends-table tbody td:first-child { border-left: none; }
+.friends-table tbody .alt td {
+    background: #fff4f6;
+    color: #80141C;
+}
+.friends-table tbody tr:last-child td { border-bottom: none; }
+.friends-table td.unknown,
+.friends-table .alt td.unknown {
+    background: linear-gradient(90deg,#fc6060 10%,#c23 130%);
+    color: #fff;
+    font-weight: bold;
+    border-radius: 8px;
+    box-shadow: 0 0 9px #99182133 inset;
+}
+/* Responsive
+
