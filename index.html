@@ -2,20 +2,40 @@
 <html lang="nl">
 <head>
     <meta charset="UTF-8">
+    <title>Web Development I</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Web Development I - Index</title>
-    <link rel="stylesheet" href="Style.Css">
+    <link rel="stylesheet" href="Style.css">
 </head>
 <body>
-<header>
-    <h1>Web Development I</h1>
+
+<header class="topbar">
+    <div class="title">
+        <strong>Web Development I</strong>
+        <span>Mohammed Achraf Laari</span>
+    </div>
 </header>
 
-<div class="content">
-    <section>
-        <h2>Semester 1</h2>
+<nav class="tabs">
+    <a class="active">Extra</a>
+    <a>JavaScript 10</a>
+    <a>JavaScript 9</a>
+    <a>JavaScript 8</a>
+    <a>JavaScript 7</a>
+    <a>JavaScript 6</a>
+    <a>JavaScript 5</a>
+    <a>JavaScript 4</a>
+    <a>JavaScript 3</a>
+    <a>JavaScript 2</a>
+    <a>JavaScript 1</a>
+</nav>
 
-        <details>
+<div class="layout">
+
+    <aside class="sidebar">
+
+        <h3>Semester 1</h3>
+
+        <details open>
             <summary>Labo 2</summary>
             <ol>
                 <li><a href="Labo_2/Opdracht_1.html">Opdracht 1</a></li>
@@ -54,7 +74,6 @@
             </ol>
         </details>
 
-
         <details>
             <summary>Labo 7</summary>
             <ol>
@@ -65,7 +84,7 @@
         <details>
             <summary>Labo 8</summary>
             <ol>
-                <li><em> Nein </em></li>
+                <li><em>Nein</em></li>
             </ol>
         </details>
 
@@ -75,10 +94,8 @@
                 <li><a href="Labo_9/index.html">Positioning of Images</a></li>
             </ol>
         </details>
-    </section>
 
-    <section>
-        <h2>Semester 2</h2>
+        <h3>Semester 2</h3>
 
         <details>
             <summary>Labo [?]</summary>
@@ -86,11 +103,22 @@
                 <li><em>Will be made when we reach Semester 2</em></li>
             </ol>
         </details>
-    </section>
+
+    </aside>
+
+    <main class="workspace">
+        <div class="placeholder">
+            <div class="icon">&lt;/&gt;</div>
+            <h2>Nog geen oefening geselecteerd.</h2>
+            <p>Selecteer een oefening uit de zijbalk om te beginnen.</p>
+        </div>
+    </main>
+
 </div>
 
 <footer>
-    <p>© 2025 Web Development I | Designed by Mohammed Achraf Laari</p>
+    © 2025 Web Development I | Designed by Mohammed Achraf Laari
 </footer>
+
 </body>
 </html>
