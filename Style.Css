@@ -1,16 +1,10 @@
 :root {
     --bg-light: #f1f5f9;
-    --bg-mid: #e2e8f0;
     --bg-dark: #0f172a;
-
-    --card-bg: #ffffff;
-
     --accent: #6366f1;
     --accent-dark: #4f46e5;
-
     --text-dark: #0f172a;
     --text-light: #f8fafc;
-
     --border: #e2e8f0;
 }
 
@@ -22,116 +16,139 @@
 
 body {
     font-family: "Inter", "Segoe UI", Arial, sans-serif;
-    background: linear-gradient(135deg, var(--bg-light), var(--bg-mid));
+    background: var(--bg-light);
     color: var(--text-dark);
-    line-height: 1.6;
-    padding-bottom: 3rem;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
-/* HEADER */
-header {
-    background: var(--bg-dark);
-    color: var(--text-light);
-    text-align: center;
-    padding: 3rem 1rem;
-    border-bottom: 4px solid var(--accent);
+/* TOP BAR */
+.topbar {
+    background: white;
+    padding: 1rem 2rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
 }
 
-header h1 {
-    font-size: 2.6rem;
-    font-weight: 700;
+.logo span {
+    margin-left: 1rem;
+    color: #64748b;
 }
 
-/* CONTENT */
-.content {
-    max-width: 950px;
-    margin: 2.5rem auto;
-    padding: 0 1.2rem;
+/* TABS */
+.tabs {
+    display: flex;
+    gap: 1rem;
+    padding: 0.5rem 2rem;
+    border-bottom: 1px solid var(--border);
+    background: white;
 }
 
-section {
-    background: var(--card-bg);
-    border-radius: 14px;
-    margin-bottom: 2.5rem;
-    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.06);
-    overflow: hidden;
+.tabs a {
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--text-dark);
+    font-weight: 600;
 }
 
-section h2 {
-    background: var(--bg-dark);
-    color: var(--text-light);
-    padding: 1.2rem 1.5rem;
-    font-size: 1.6rem;
-    border-left: 6px solid var(--accent);
+.tabs a.active {
+    background: var(--accent);
+    color: white;
+}
+
+/* MAIN LAYOUT */
+.layout {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 300px 1fr;
+}
+
+/* SIDEBAR */
+.sidebar {
+    border-right: 1px solid var(--border);
+    padding: 1.5rem;
+    overflow-y: auto;
+    background: white;
+}
+
+.sidebar h3 {
+    margin-bottom: 1rem;
+    color: #475569;
+}
+
+.exercise-card {
+    background: #f8fafc;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.9rem 1rem;
+    margin-bottom: 0.7rem;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.exercise-card:hover {
+    background: var(--accent);
+    color: white;
 }
 
 /* DETAILS */
 details {
-    border-top: 1px solid var(--border);
+    margin-bottom: 1rem;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
 }
 
-details summary {
-    background: var(--accent);
-    color: var(--text-light);
-    padding: 1rem 1.5rem;
-    font-size: 1.2rem;
+summary {
+    padding: 0.8rem 1rem;
+    font-weight: 600;
+    background: #f1f5f9;
     cursor: pointer;
+}
+
+details ul {
     list-style: none;
-    transition: all 0.25s ease;
+    padding: 0.5rem 1rem;
 }
 
-details summary::-webkit-details-marker {
-    display: none;
+details li {
+    padding: 0.4rem 0;
 }
 
-details summary:hover {
-    padding-left: 1.8rem;
-    background: var(--accent-dark);
+details a {
+    text-decoration: none;
+    color: var(--accent);
+    font-weight: 500;
 }
 
-details[open] summary {
-    background: var(--accent-dark);
-}
-
-/* LIST */
-ol {
-    list-style: none;
-    padding: 1.2rem 1.5rem;
-    margin: 0;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 0.75rem;
+/* WORKSPACE */
+.workspace {
+    display: flex;
+    justify-content: center;
+    align-items: center;
     background: #f8fafc;
 }
 
-ol li {
-    background: #f1f5f9;
-    padding: 0.75rem 1rem;
-    border-radius: 8px;
-    border-left: 5px solid var(--accent);
-    transition: all 0.25s ease;
+.placeholder {
+    text-align: center;
+    color: #64748b;
 }
 
-ol li:hover {
-    background: #e2e8f0;
-    transform: translateX(4px);
-}
-
-/* LINKS */
-a {
-    text-decoration: none;
-    color: var(--accent);
-    font-weight: 600;
-}
-
-a:hover {
-    color: var(--accent-dark);
+.placeholder .icon {
+    font-size: 4rem;
+    opacity: 0.3;
+    margin-bottom: 1rem;
 }
 
 /* FOOTER */
 footer {
     text-align: center;
     font-size: 0.9rem;
+    padding: 0.7rem;
+    border-top: 1px solid var(--border);
     color: #64748b;
-    margin: 2rem 0 1rem;
+    background: white;
 }
