@@ -1,0 +1,92 @@
+/* Reset & base styling */
+* {
+    box-sizing: border-box;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+body {
+    min-height: 100vh;
+    margin: 0;
+    background: linear-gradient(135deg, #1e293b, #0f172a);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #e5e7eb;
+}
+
+/* Calculator container (implicit, using body layout) */
+input,
+button,
+span {
+    font-size: 1rem;
+}
+
+/* Number inputs */
+input[type="number"] {
+    width: 120px;
+    padding: 0.6rem;
+    border-radius: 8px;
+    border: none;
+    background-color: #1f2937;
+    color: #e5e7eb;
+    text-align: center;
+}
+
+input[type="number"]::placeholder {
+    color: #9ca3af;
+}
+
+/* Buttons */
+input[type="button"] {
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+    border: none;
+    background-color: #2563eb;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+input[type="button"]:hover {
+    background-color: #1d4ed8;
+}
+
+input[type="button"]:active {
+    transform: scale(0.95);
+}
+
+/* Output text */
+#txtOutput {
+    display: block;
+    margin-top: 1rem;
+    padding: 0.75rem 1rem;
+    background-color: #020617;
+    border-radius: 10px;
+    font-weight: 500;
+    color: #38bdf8;
+    min-width: 320px;
+    text-align: center;
+}
+
+/* Layout spacing */
+body > input,
+body > span {
+    margin: 0.25rem;
+}
+
+/* Responsive improvement */
+@media (max-width: 480px) {
+    body {
+        flex-direction: column;
+    }
+
+    input[type="number"] {
+        width: 100%;
+    }
+
+    #txtOutput {
+        min-width: unset;
+        width: 100%;
+    }
+}
