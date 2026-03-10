@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="nl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oefening</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            max-width: 600px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        fieldset {
+            border: 1px solid #ccc;
+            padding: 15px;
+        }
+
+        legend {
+            font-weight: bold;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        input,
+        select,
+        button {
+            padding: 6px;
+            font-size: 14px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .inline {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .inline input {
+            width: auto;
+        }
+
+        button {
+            width: auto;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+<form>
+
+    <fieldset>
+        <legend>Personal Information</legend>
+
+        <label for="first-name">First Name *</label>
+        <input type="text" id="first-name" name="first-name" placeholder="Your first name" required autofocus>
+
+        <label for="last-name">Last Name *</label>
+        <input type="text" id="last-name" name="last-name" placeholder="Your last name" required>
+
+        <label for="dob">Date of birth</label>
+        <input type="date" id="dob" name="dob">
+
+        <fieldset>
+            <legend>Gender</legend>
+
+            <input type="radio" id="male" name="gender" value="Male">
+            <label for="male">Male</label>
+
+            <input type="radio" id="female" name="gender" value="Female">
+            <label for="female">Female</label>
+        </fieldset>
+
+    </fieldset>
+
+    <fieldset>
+        <legend>Sports</legend>
+
+        <p>Which sport do you train?</p>
+
+        <div class="inline">
+            <input type="checkbox" id="running" name="sport[]" value="Running">
+            <label for="running">Running</label>
+        </div>
+
+        <div class="inline">
+            <input type="checkbox" id="swimming" name="sport[]" value="Swimming">
+            <label for="swimming">Swimming</label>
+        </div>
+
+        <div class="inline">
+            <input type="checkbox" id="rowing" name="sport[]" value="Rowing">
+            <label for="rowing">Rowing</label>
+        </div>
+
+    </fieldset>
+
+    <fieldset>
+        <legend>Preferences</legend>
+
+        <label for="movie">Favourite movie</label>
+        <input type="text" id="movie" name="movie">
+
+        <label for="quote">Favourite quote</label>
+        <input type="text" id="quote" name="quote" placeholder="Write your favorite quote">
+
+        <label for="food">Favorite food</label>
+        <select id="food" name="food">
+            <option value="">Select one</option>
+            <option value="hamburger">Hamburger</option>
+            <option value="pizza">Pizza</option>
+        </select>
+
+        <label for="color">Favorite color</label>
+        <input type="color" id="color" name="color">
+
+    </fieldset>
+
+    <fieldset>
+        <legend>Account</legend>
+
+        <label for="email">Email address</label>
+        <input type="email" id="email" name="email" placeholder="Enter your email address">
+
+        <label for="site">Favorite site</label>
+        <input type="url" id="site" name="site" placeholder="https://example.com">
+
+        <label for="password">Password *</label>
+        <input type="password" id="password" name="password" required>
+
+        <label for="file">Upload a file</label>
+        <input type="file" id="file" name="file">
+
+    </fieldset>
+
+    <fieldset>
+        <legend>Extra</legend>
+
+        <label for="fav-num-1">Favorite number (1–10)</label>
+        <input type="number" id="fav-num-1" name="fav-num-1" min="1" max="10">
+
+        <label for="fav-num-2">Favorite number (11–1000)</label>
+        <input type="range" id="fav-num-2" name="fav-num-2" min="11" max="1000">
+
+        <label for="zip">Belgian ZIP code *</label>
+        <input type="text" id="zip" name="zip" pattern="[1-9][0-9]{3}" placeholder="1000" required>
+
+        <label for="search">Search</label>
+        <input type="search" id="search" name="search">
+
+    </fieldset>
+
+    <button type="submit">Submit</button>
+
+</form>
+
+</body>
+</html>
