@@ -36,7 +36,7 @@ h3 {
 }
 
 header {
-    background-image: url(../images/bgsky3.jpg);
+    background-image: url(../Images/bgsky3.jpg);
     background-size: cover;
     grid-column: span 2;
     height: 200px;

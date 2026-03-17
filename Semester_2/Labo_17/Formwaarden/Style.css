@@ -1,0 +1,10 @@
+.form-group {
+    display: grid;
+    grid-template-columns: auto 85%;
+    margin-bottom: 10px;
+}
+
+#buurland,
+#bestelling {
+    width: 200px;
+}

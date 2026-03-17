@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="nl">
+
+<head>
+    <title>Oefening</title>
+    <link rel="stylesheet" type="text/css" href="Style.css">
+</head>
+
+<body>
+<form id="mijnFormulier">
+    <div class="form-group">
+        <label for="roker">Is roker:</label>
+        <div><input type="checkbox" id="roker" name="roker"></div>
+
+    </div>
+
+    <div class="form-group">
+        <p>Moedertaal:</p>
+        <div class="radio-group">
+            <input type="radio" id="nl" name="moedertaal" value="nl">
+            <label for="nl">Nederlands</label>
+
+            <input type="radio" id="fr" name="moedertaal" value="fr">
+            <label for="fr">Frans</label>
+
+            <input type="radio" id="en" name="moedertaal" value="en">
+            <label for="en">Engels</label>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="buurland">Favoriete buurland:</label>
+        <select id="buurland" name="buurland">
+            <option value="nederland">Nederland</option>
+            <option value="frankrijk">Frankrijk</option>
+            <option value="duitsland">Duitsland</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="bestelling">Bestelling:</label>
+        <select id="bestelling" name="bestelling" multiple size="6">
+            <option value="aardappelen">aardappelen</option>
+            <option value="brood">brood</option>
+            <option value="melk">melk</option>
+            <option value="biefstuk">biefstuk</option>
+            <option value="chips">chips</option>
+            <option value="krant">krant</option>
+        </select>
+    </div>
+
+
+    <button type="button" id="toonResultaat">Toon resultaat</button>
+</form>
+
+<script src="JS.js"></script>
+</body>
+
+</html>
