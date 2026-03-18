@@ -1,13 +1,11 @@
 const setup = () => {
     let texts=document.querySelectorAll(".text");
-	for (let i=0;i<texts.length;i++) {
-		texts[i].addEventListener("click", klik);
-	}	
+    texts.forEach(t => {t.addEventListener("click", klik)});
 }
 
 
 const klik = (event) => {
-	event.target.style.color="red";
+    event.target.style.color="red";
 };
 
 window.addEventListener("load", setup);
