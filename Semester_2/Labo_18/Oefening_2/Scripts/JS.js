@@ -7,7 +7,7 @@ const setup = () => {
 
     const img = document.createElement("img");
     img.src = "Assets/Random.png";
-    img.alt = "Mijn portret!";
+    img.alt = "RANDOM IMAGE GO!";
 
     body.appendChild(img);
 };
