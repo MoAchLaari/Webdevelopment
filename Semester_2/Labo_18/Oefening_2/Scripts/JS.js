@@ -4,7 +4,7 @@ const setup = () => {
     });
     const body = document.querySelector("body");
     const img = document.createElement("img");
-    img.setAttribute("src", "assets/banaan.jpg");
+    img.setAttribute("src", "Assets/Random Image.png");
     img.setAttribute("alt","Mijn portret!");
     body.appendChild(img);
 }
