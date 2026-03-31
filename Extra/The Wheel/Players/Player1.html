@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Person 1</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div class="container">
+    <a href="index.html">← Back</a>
+
+    <h1 contenteditable="true" id="name">Player 1</h1>
+
+    <div class="section">
+        <h3>Options (max 10)</h3>
+        <input id="item-input" placeholder="Add option..." />
+        <button onclick="addItem()">Add</button>
+        <div id="items"></div>
+    </div>
+
+    <div class="section">
+        <h3>Extras (max 10)</h3>
+        <input id="extra-input" placeholder="Add extra..." />
+        <button onclick="addExtra()">Add</button>
+        <div id="extras"></div>
+    </div>
+
+    <div class="section">
+        <h3>Received</h3>
+        <div id="received"></div>
+    </div>
+
+    <button onclick="roll()">Roll</button>
+
+    <div id="result" class="result"></div>
+</div>
+
+<script src="script.js"></script>
+<script>
+    init("person1");
+</script>
+
+</body>
+</html>
