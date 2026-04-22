@@ -7,42 +7,64 @@
     <link rel="stylesheet" type="text/css" href="ColorpickerPRO.css">
 </head>
 <body>
+<!--
+  This is the full-screen background layer.
+  The JavaScript will inject animated color blobs into this element.
+  It is placed BEFORE the app so the app can sit visually above it.
+-->
 <div id="background-blobs"></div>
-<div>
+
+<!--
+  Main app wrapper.
+  This class is important because the CSS uses .app to center the picker
+  and place it above the animated background.
+-->
+<div class="app">
     <div class="container">
         <div class="sliders">
-            <div>
-                <input type="range" id="red-slider" min="0" max="255">
-                <span>
-              <span>Red&nbsp;</span>
-              <span id="red-value">255</span>
-            </span>
+            <div class="slider-row">
+                <!--
+                  Default values are added directly to the sliders.
+                  This prevents the picker from starting at 0,0,0 unless you want that.
+                -->
+                <input type="range" id="red-slider" min="0" max="255" value="255">
+                <span class="slider-label">
+                        <span>Red&nbsp;</span>
+                        <span id="red-value">255</span>
+                    </span>
             </div>
-            <div>
-                <input type="range" id="green-slider" min="0" max="255">
-                <span>
-              <span>Green&nbsp;</span>
-              <span id="green-value">128</span>
-            </span>
+
+            <div class="slider-row">
+                <input type="range" id="green-slider" min="0" max="255" value="128">
+                <span class="slider-label">
+                        <span>Green&nbsp;</span>
+                        <span id="green-value">128</span>
+                    </span>
             </div>
-            <div>
-                <input type="range" id="blue-slider" min="0" max="255">
-                <span>
-              <span>Blue&nbsp;</span>
-              <span id="blue-value">128</span>
-            </span>
+
+            <div class="slider-row">
+                <input type="range" id="blue-slider" min="0" max="255" value="128">
+                <span class="slider-label">
+                        <span>Blue&nbsp;</span>
+                        <span id="blue-value">128</span>
+                    </span>
             </div>
-        </div>
-        <div id="color-box">
-            <p id="hexDisplay">#000000</p>
         </div>
 
+        <!--
+          Clicking the preview box copies the current hex value.
+        -->
+        <div id="color-box" title="Click to copy HEX color">
+            <p id="hexDisplay">#ff8080</p>
+        </div>
     </div>
+
     <div id="swatch-group">
-        <button id="save-button">Save Color</button>
+        <button id="save-button" type="button">Save Color</button>
         <div id="swatch-box"></div>
     </div>
 </div>
+
 <script src="ColorpickerPRO.js"></script>
 </body>
 </html>
