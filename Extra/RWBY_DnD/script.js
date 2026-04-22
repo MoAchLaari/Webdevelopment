@@ -26,7 +26,7 @@ const SKILL_MAP = {
     STR: ["Saving Throw","Athletics"],
     DEX: ["Saving Throw", "Acrobatics", "Sleight of Hand", "Stealth"],
     CON: ["Saving Throw", "Endurance"],
-    INT: ["Saving Throw", "History", "Investigation", "Nature", "Religion", "Aura Mastery"],
+    INT: ["Saving Throw", "Aura Mastery", "History", "Investigation", "Nature", "Religion"],
     WIS: ["Saving Throw", "Animal Handling", "Insight", "Medicine", "Perception", "Survival"],
     CHA: ["Saving Throw", "Deception", "Intimidation", "Performance", "Persuasion"]
 };
