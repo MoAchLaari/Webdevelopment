@@ -137,24 +137,32 @@ class ColorpickerPRO {
     }
 
     updateBackground() {
-        if (this.state.swatches.length === 0) {
-            this.elements.body.style.background = '#f4f4f4';
-            return;
-        }
+        const container = document.getElementById('background-blobs');
 
-        const gradient = `linear-gradient(270deg, ${this.state.swatches.join(',')})`;
+        // Clear old blobs
+        container.innerHTML = '';
 
-        this.elements.body.style.background = gradient;
-        this.elements.body.style.backgroundSize = '400% 400%';
-        this.elements.body.style.animation = 'gradientMove 10s ease infinite';
-    }
+        if (this.state.swatches.length === 0) return;
 
-    copyColorToClipboard() {
-        const hex = ColorpickerPRO.rgbToHex(this.state.currentColor);
+        this.state.swatches.forEach(color => {
+            const blob = document.createElement('div');
+            blob.className = 'blob';
 
-        navigator.clipboard.writeText(hex).then(() => {
-            this.elements.hexDisplay.textContent = "Copied!";
-            setTimeout(() => this.elements.hexDisplay.textContent = hex, 1200);
+            blob.style.background = color;
+
+            // Random position
+            blob.style.top = Math.random() * 80 + '%';
+            blob.style.left = Math.random() * 80 + '%';
+
+            // Random animation delay for variation
+            blob.style.animationDelay = (Math.random() * 10) + 's';
+
+            // Random size variation
+            const size = 250 + Math.random() * 200;
+            blob.style.width = size + 'px';
+            blob.style.height = size + 'px';
+
+            container.appendChild(blob);
         });
     }
 
@@ -164,5 +172,6 @@ class ColorpickerPRO {
             .join('');
     }
 }
+
 
 window.addEventListener('load', () => new ColorpickerPRO());
