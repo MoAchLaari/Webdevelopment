@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Neon Sheet System</title>
+    <title>RWBY DnD</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;800&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -18,17 +18,22 @@
     <aside class="sidebar panel">
         <div class="brand">
             <div class="micro">HOME BREW SYSTEM</div>
-            <h1>NEON SHEET</h1>
-            <p>Futuristic character management with player sheets and DM controls.</p>
+            <h1>Chaaracter Sheets</h1>
+            <p>The Characters. Alive, Dead and Reserves.</p>
         </div>
 
         <div class="sidebar-section">
             <div class="section-label">CHARACTERS</div>
+            <div class="sidebar-buttons compact">
+                <button id="addCharacterBtn" class="neo-btn">Add Character</button>
+                <button id="toggleReserveBtn" class="neo-btn ghost">Show Reserve</button>
+                <button id="toggleDeadBtn" class="neo-btn ghost">Show Dead</button>
+            </div>
             <div id="characterTabs" class="character-tabs"></div>
         </div>
 
         <div class="sidebar-section">
-            <div class="section-label">RESOURCE TOOLS</div>
+            <div class="section-label">The Dice</div>
             <div class="sidebar-buttons">
                 <button id="rollHpBtn" class="neo-btn">Roll HP</button>
                 <button id="rollAuraBtn" class="neo-btn">Roll Aura</button>
@@ -41,8 +46,9 @@
             <div class="section-label">STATUS</div>
             <div class="status-box">
                 <div><span>Selected:</span><strong id="selectedNameSmall">Player 1</strong></div>
+                <div><span>State:</span><strong id="selectedState">Active</strong></div>
                 <div><span>Ascended:</span><strong id="selectedAscendedStatus">Locked</strong></div>
-                <div><span>Granted Techniques:</span><strong id="selectedTechniqueCount">0</strong></div>
+                <div><span>Aura Techniques Learned:</span><strong id="selectedTechniqueCount">0</strong></div>
             </div>
         </div>
     </aside>
@@ -173,13 +179,13 @@
                     <section class="panel">
                         <div class="section-title-row">
                             <div class="section-title">STATS</div>
-                            <div class="small-note">Use + / - to point-buy or edit the value directly.</div>
+                            <div class="small-note">Use + / - to point-buy or edit directly.</div>
                         </div>
                         <div id="statsGrid" class="stats-grid"></div>
                     </section>
 
                     <section class="panel">
-                        <div class="section-title">SEMBlANCE PROGRESSION</div>
+                        <div class="section-title">SEMBLANCE PROGRESSION</div>
                         <div id="semblanceStages" class="semblance-stages"></div>
                     </section>
                 </div>
@@ -189,6 +195,7 @@
                         <button class="tab-btn active" data-tab="skills">Skills</button>
                         <button class="tab-btn" data-tab="weapons">Weapons</button>
                         <button class="tab-btn" data-tab="abilities">Abilities</button>
+                        <button class="tab-btn" data-tab="dust-spells">Dust Spells</button>
                         <button class="tab-btn" data-tab="inventory">Inventory</button>
                         <button class="tab-btn" data-tab="notes">Notes</button>
                         <button class="tab-btn" data-tab="aura-techniques">Aura Techniques</button>
@@ -196,7 +203,7 @@
                     </div>
 
                     <div id="tab-skills" class="tab-content active">
-                        <div class="section-title">SKILL MATRIX</div>
+                        <div class="section-title">ABILITY SCORES</div>
                         <div id="skillsMatrix" class="skills-matrix"></div>
                     </div>
 
@@ -208,6 +215,37 @@
                     <div id="tab-abilities" class="tab-content">
                         <div class="section-title">ABILITIES / FEATURES / FEATS</div>
                         <textarea id="abilitiesText" placeholder="Add feats, passives, class features, traits..."></textarea>
+                    </div>
+
+                    <div id="tab-dust-spells" class="tab-content">
+                        <div class="section-title-row">
+                            <div class="section-title">DUST INVENTORY</div>
+                            <div class="small-note">Using a Dust Spell consumes one of its selected dust type.</div>
+                        </div>
+
+                        <div id="dustInventoryGrid" class="dust-grid"></div>
+
+                        <div class="section-title">CREATE DUST SPELL</div>
+                        <div class="form-grid">
+                            <div class="field">
+                                <label>Spell Name</label>
+                                <input id="dustSpellName" type="text" placeholder="Spell name" />
+                            </div>
+                            <div class="field">
+                                <label>Dust Type</label>
+                                <select id="dustSpellType"></select>
+                            </div>
+                        </div>
+
+                        <div class="field">
+                            <label>Description</label>
+                            <textarea id="dustSpellDescription" class="small-textarea" placeholder="What the Dust Spell does..."></textarea>
+                        </div>
+
+                        <button id="addDustSpellBtn" class="neo-btn">Add Dust Spell</button>
+
+                        <div class="section-title dust-spell-gap">CREATED DUST SPELLS</div>
+                        <div id="dustSpellList" class="technique-list"></div>
                     </div>
 
                     <div id="tab-inventory" class="tab-content">
@@ -263,30 +301,101 @@
                             </section>
 
                             <section class="dm-panel-block">
-                                <div class="section-title">SEMBlANCE CONTROL</div>
-                                <div class="field">
-                                    <label>Base Passive</label>
-                                    <textarea id="dmBasePassive" class="small-textarea" placeholder="Base passive"></textarea>
+                                <div class="section-title">CHARACTER STATE</div>
+                                <div class="unlock-grid">
+                                    <label><input id="stateActive" type="radio" name="charState" value="active" /> Active</label>
+                                    <label><input id="stateReserve" type="radio" name="charState" value="reserve" /> Reserve</label>
+                                    <label><input id="stateDead" type="radio" name="charState" value="dead" /> Dead</label>
                                 </div>
+                                <button id="saveCharacterStateBtn" class="neo-btn">Save Character State</button>
+                            </section>
+
+                            <section class="dm-panel-block">
+                                <div class="section-title">SEMBLANCE CONTROL</div>
+
                                 <div class="field">
                                     <label>Base Active</label>
                                     <textarea id="dmBaseActive" class="small-textarea" placeholder="Base active"></textarea>
                                 </div>
                                 <div class="field">
-                                    <label>First Evolution</label>
-                                    <textarea id="dmFirstEvolution" class="small-textarea" placeholder="First evolution"></textarea>
+                                    <label>Base Passive Name</label>
+                                    <input id="dmBasePassiveName" type="text" placeholder="Passive name" />
                                 </div>
                                 <div class="field">
-                                    <label>Second Evolution</label>
-                                    <textarea id="dmSecondEvolution" class="small-textarea" placeholder="Second evolution"></textarea>
+                                    <label>Base Passive Description</label>
+                                    <textarea id="dmBasePassiveDesc" class="small-textarea" placeholder="Base passive description"></textarea>
                                 </div>
                                 <div class="field">
-                                    <label>Third Evolution</label>
-                                    <textarea id="dmThirdEvolution" class="small-textarea" placeholder="Third evolution"></textarea>
+                                    <label>Base Aura Cost</label>
+                                    <input id="dmBaseCost" type="number" min="0" />
+                                </div>
+
+                                <div class="field">
+                                    <label>First Evolution Active</label>
+                                    <textarea id="dmFirstActive" class="small-textarea" placeholder="First evolution active"></textarea>
                                 </div>
                                 <div class="field">
-                                    <label>Ascended</label>
-                                    <textarea id="dmAscendedEvolution" class="small-textarea" placeholder="Ascended evolution"></textarea>
+                                    <label>First Evolution Passive Name</label>
+                                    <input id="dmFirstPassiveName" type="text" placeholder="Passive name" />
+                                </div>
+                                <div class="field">
+                                    <label>First Evolution Passive Description</label>
+                                    <textarea id="dmFirstPassiveDesc" class="small-textarea" placeholder="First evolution passive description"></textarea>
+                                </div>
+                                <div class="field">
+                                    <label>First Evolution Aura Cost</label>
+                                    <input id="dmFirstCost" type="number" min="0" />
+                                </div>
+
+                                <div class="field">
+                                    <label>Second Evolution Active</label>
+                                    <textarea id="dmSecondActive" class="small-textarea" placeholder="Second evolution active"></textarea>
+                                </div>
+                                <div class="field">
+                                    <label>Second Evolution Passive Name</label>
+                                    <input id="dmSecondPassiveName" type="text" placeholder="Passive name" />
+                                </div>
+                                <div class="field">
+                                    <label>Second Evolution Passive Description</label>
+                                    <textarea id="dmSecondPassiveDesc" class="small-textarea" placeholder="Second evolution passive description"></textarea>
+                                </div>
+                                <div class="field">
+                                    <label>Second Evolution Aura Cost</label>
+                                    <input id="dmSecondCost" type="number" min="0" />
+                                </div>
+
+                                <div class="field">
+                                    <label>Third Evolution Active</label>
+                                    <textarea id="dmThirdActive" class="small-textarea" placeholder="Third evolution active"></textarea>
+                                </div>
+                                <div class="field">
+                                    <label>Third Evolution Passive Name</label>
+                                    <input id="dmThirdPassiveName" type="text" placeholder="Passive name" />
+                                </div>
+                                <div class="field">
+                                    <label>Third Evolution Passive Description</label>
+                                    <textarea id="dmThirdPassiveDesc" class="small-textarea" placeholder="Third evolution passive description"></textarea>
+                                </div>
+                                <div class="field">
+                                    <label>Third Evolution Aura Cost</label>
+                                    <input id="dmThirdCost" type="number" min="0" />
+                                </div>
+
+                                <div class="field">
+                                    <label>Ascended Active</label>
+                                    <textarea id="dmAscendedActive" class="small-textarea" placeholder="Ascended active"></textarea>
+                                </div>
+                                <div class="field">
+                                    <label>Ascended Passive Name</label>
+                                    <input id="dmAscendedPassiveName" type="text" placeholder="Passive name" />
+                                </div>
+                                <div class="field">
+                                    <label>Ascended Passive Description</label>
+                                    <textarea id="dmAscendedPassiveDesc" class="small-textarea" placeholder="Ascended passive description"></textarea>
+                                </div>
+                                <div class="field">
+                                    <label>Ascended Aura Cost</label>
+                                    <input id="dmAscendedCost" type="number" min="0" />
                                 </div>
 
                                 <div class="unlock-grid">

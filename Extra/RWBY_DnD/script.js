@@ -1,6 +1,26 @@
-const STORAGE_KEY = "neon-sheet-system-v2";
+const STORAGE_KEY = "neon-sheet-system-v3";
 
 const STAT_ORDER = ["STR", "DEX", "CON", "INT", "WIS", "CHA"];
+
+const DUST_TYPES = [
+    "Fire Dust",
+    "Ice Dust",
+    "Electricity Dust",
+    "Wind Dust",
+    "Earth Dust",
+    "Gravity Dust",
+    "Hard Light Dust"
+];
+
+const DUST_CLASS_MAP = {
+    "Fire Dust": "dust-fire",
+    "Ice Dust": "dust-ice",
+    "Electricity Dust": "dust-electricity",
+    "Wind Dust": "dust-wind",
+    "Earth Dust": "dust-earth",
+    "Gravity Dust": "dust-gravity",
+    "Hard Light Dust": "dust-hardlight"
+};
 
 const SKILL_MAP = {
     STR: ["Athletics"],
@@ -21,9 +41,23 @@ function makeBlankSkills() {
     return skills;
 }
 
-function blankCharacter(index) {
+function blankStage() {
     return {
-        id: index + 1,
+        active: "",
+        passiveName: "",
+        passiveDescription: "",
+        auraCost: 0
+    };
+}
+
+function blankCharacter(index) {
+    const dustInventory = {};
+    DUST_TYPES.forEach((type) => {
+        dustInventory[type] = 0;
+    });
+
+    return {
+        id: Date.now() + index,
         name: "",
         race: "",
         className: "",
@@ -32,6 +66,7 @@ function blankCharacter(index) {
         background: "",
         semblanceName: "",
         proficiencyBonus: 2,
+        state: index < 4 ? "active" : "reserve",
 
         stats: {
             STR: 10,
@@ -44,15 +79,8 @@ function blankCharacter(index) {
 
         skills: makeBlankSkills(),
 
-        hp: {
-            current: 0,
-            max: 0
-        },
-
-        aura: {
-            current: 0,
-            max: 0
-        },
+        hp: { current: 0, max: 0 },
+        aura: { current: 0, max: 0 },
 
         armor: 0,
         initiative: "",
@@ -65,13 +93,15 @@ function blankCharacter(index) {
 
         grantedTechniqueIds: [],
 
+        dustInventory,
+        dustSpells: [],
+
         semblance: {
-            basePassive: "",
-            baseActive: "",
-            firstEvolution: "",
-            secondEvolution: "",
-            thirdEvolution: "",
-            ascended: "",
+            base: blankStage(),
+            first: blankStage(),
+            second: blankStage(),
+            third: blankStage(),
+            ascended: blankStage(),
             unlocked: {
                 first: false,
                 second: false,
@@ -85,6 +115,8 @@ function blankCharacter(index) {
 const defaultState = {
     selectedCharacter: 0,
     activeTab: "skills",
+    showReserve: false,
+    showDead: false,
     characters: [
         blankCharacter(0),
         blankCharacter(1),
@@ -99,6 +131,7 @@ let state = loadState();
 const els = {
     characterTabs: document.getElementById("characterTabs"),
     selectedNameSmall: document.getElementById("selectedNameSmall"),
+    selectedState: document.getElementById("selectedState"),
     selectedAscendedStatus: document.getElementById("selectedAscendedStatus"),
     selectedTechniqueCount: document.getElementById("selectedTechniqueCount"),
     topCharacterName: document.getElementById("topCharacterName"),
@@ -139,6 +172,13 @@ const els = {
 
     grantedTechniques: document.getElementById("grantedTechniques"),
 
+    dustInventoryGrid: document.getElementById("dustInventoryGrid"),
+    dustSpellName: document.getElementById("dustSpellName"),
+    dustSpellType: document.getElementById("dustSpellType"),
+    dustSpellDescription: document.getElementById("dustSpellDescription"),
+    addDustSpellBtn: document.getElementById("addDustSpellBtn"),
+    dustSpellList: document.getElementById("dustSpellList"),
+
     dmTechName: document.getElementById("dmTechName"),
     dmTechLevel: document.getElementById("dmTechLevel"),
     dmTechCost: document.getElementById("dmTechCost"),
@@ -147,12 +187,35 @@ const els = {
     createTechniqueBtn: document.getElementById("createTechniqueBtn"),
     dmTechniqueDatabase: document.getElementById("dmTechniqueDatabase"),
 
-    dmBasePassive: document.getElementById("dmBasePassive"),
+    stateActive: document.getElementById("stateActive"),
+    stateReserve: document.getElementById("stateReserve"),
+    stateDead: document.getElementById("stateDead"),
+    saveCharacterStateBtn: document.getElementById("saveCharacterStateBtn"),
+
     dmBaseActive: document.getElementById("dmBaseActive"),
-    dmFirstEvolution: document.getElementById("dmFirstEvolution"),
-    dmSecondEvolution: document.getElementById("dmSecondEvolution"),
-    dmThirdEvolution: document.getElementById("dmThirdEvolution"),
-    dmAscendedEvolution: document.getElementById("dmAscendedEvolution"),
+    dmBasePassiveName: document.getElementById("dmBasePassiveName"),
+    dmBasePassiveDesc: document.getElementById("dmBasePassiveDesc"),
+    dmBaseCost: document.getElementById("dmBaseCost"),
+
+    dmFirstActive: document.getElementById("dmFirstActive"),
+    dmFirstPassiveName: document.getElementById("dmFirstPassiveName"),
+    dmFirstPassiveDesc: document.getElementById("dmFirstPassiveDesc"),
+    dmFirstCost: document.getElementById("dmFirstCost"),
+
+    dmSecondActive: document.getElementById("dmSecondActive"),
+    dmSecondPassiveName: document.getElementById("dmSecondPassiveName"),
+    dmSecondPassiveDesc: document.getElementById("dmSecondPassiveDesc"),
+    dmSecondCost: document.getElementById("dmSecondCost"),
+
+    dmThirdActive: document.getElementById("dmThirdActive"),
+    dmThirdPassiveName: document.getElementById("dmThirdPassiveName"),
+    dmThirdPassiveDesc: document.getElementById("dmThirdPassiveDesc"),
+    dmThirdCost: document.getElementById("dmThirdCost"),
+
+    dmAscendedActive: document.getElementById("dmAscendedActive"),
+    dmAscendedPassiveName: document.getElementById("dmAscendedPassiveName"),
+    dmAscendedPassiveDesc: document.getElementById("dmAscendedPassiveDesc"),
+    dmAscendedCost: document.getElementById("dmAscendedCost"),
 
     unlockFirst: document.getElementById("unlockFirst"),
     unlockSecond: document.getElementById("unlockSecond"),
@@ -163,7 +226,11 @@ const els = {
     rollHpBtn: document.getElementById("rollHpBtn"),
     rollAuraBtn: document.getElementById("rollAuraBtn"),
     restoreAuraBtn: document.getElementById("restoreAuraBtn"),
-    restoreHpBtn: document.getElementById("restoreHpBtn")
+    restoreHpBtn: document.getElementById("restoreHpBtn"),
+
+    addCharacterBtn: document.getElementById("addCharacterBtn"),
+    toggleReserveBtn: document.getElementById("toggleReserveBtn"),
+    toggleDeadBtn: document.getElementById("toggleDeadBtn")
 };
 
 function loadState() {
@@ -181,7 +248,7 @@ function saveState() {
 }
 
 function getCharacter() {
-    return state.characters[state.selectedCharacter];
+    return state.characters[state.selectedCharacter] || state.characters[0];
 }
 
 function clamp(value, min, max) {
@@ -200,17 +267,40 @@ function rollD10() {
     return Math.floor(Math.random() * 10) + 1;
 }
 
+function ensureCurrentWithinMax(character) {
+    character.hp.max = Math.max(0, Number(character.hp.max) || 0);
+    character.aura.max = Math.max(0, Number(character.aura.max) || 0);
+    character.hp.current = clamp(Number(character.hp.current) || 0, 0, character.hp.max);
+    character.aura.current = clamp(Number(character.aura.current) || 0, 0, character.aura.max);
+}
+
+function visibleCharacters() {
+    return state.characters.filter((character) => {
+        if (character.state === "dead") return state.showDead;
+        if (character.state === "reserve") return state.showReserve;
+        return true;
+    });
+}
+
 function renderCharacterTabs() {
     els.characterTabs.innerHTML = "";
-    state.characters.forEach((character, index) => {
+
+    const visible = visibleCharacters();
+    if (!visible.length) {
+        els.characterTabs.innerHTML = `<div class="character-tab"><strong>No characters visible</strong><span>Toggle reserve or dead to see more.</span></div>`;
+        return;
+    }
+
+    visible.forEach((character) => {
+        const actualIndex = state.characters.findIndex((c) => c.id === character.id);
         const tab = document.createElement("div");
-        tab.className = `character-tab ${index === state.selectedCharacter ? "active" : ""}`;
+        tab.className = `character-tab ${actualIndex === state.selectedCharacter ? "active" : ""} ${character.state}`;
         tab.innerHTML = `
-      <strong>${character.name || `Character ${index + 1}`}</strong>
+      <strong>${character.name || `Character ${actualIndex + 1}`}</strong>
       <span>${character.semblanceName || "No Semblance Set"}</span>
     `;
         tab.addEventListener("click", () => {
-            state.selectedCharacter = index;
+            state.selectedCharacter = actualIndex;
             saveState();
             render();
         });
@@ -227,10 +317,15 @@ function renderHeader() {
     els.topArmorMini.textContent = c.armor;
     els.selectedAscendedStatus.textContent = c.semblance.unlocked.ascended ? "Unlocked" : "Locked";
     els.selectedTechniqueCount.textContent = c.grantedTechniqueIds.length;
+    els.selectedState.textContent = c.state.charAt(0).toUpperCase() + c.state.slice(1);
+
+    els.toggleReserveBtn.textContent = state.showReserve ? "Hide Reserve" : "Show Reserve";
+    els.toggleDeadBtn.textContent = state.showDead ? "Hide Dead" : "Show Dead";
 }
 
 function renderMainFields() {
     const c = getCharacter();
+    ensureCurrentWithinMax(c);
 
     els.charName.value = c.name;
     els.charLevel.value = c.level;
@@ -259,6 +354,7 @@ function renderMainFields() {
 
     const hpWidth = c.hp.max > 0 ? (c.hp.current / c.hp.max) * 100 : 0;
     const auraWidth = c.aura.max > 0 ? (c.aura.current / c.aura.max) * 100 : 0;
+
     els.hpBar.style.width = `${clamp(hpWidth, 0, 100)}%`;
     els.auraBar.style.width = `${clamp(auraWidth, 0, 100)}%`;
 }
@@ -342,62 +438,69 @@ function renderSkills() {
     });
 }
 
+function stageLocked(stageKey, character) {
+    if (stageKey === "base") return false;
+    return !character.semblance.unlocked[stageKey];
+}
+
+function stageTitle(stageKey) {
+    const names = {
+        base: "Base",
+        first: "First Evolution",
+        second: "Second Evolution",
+        third: "Third Evolution",
+        ascended: "Ascended"
+    };
+    return names[stageKey];
+}
+
 function renderSemblanceStages() {
     const c = getCharacter();
-    const s = c.semblance;
-
-    const stages = [
-        {
-            title: "Base Passive",
-            text: s.basePassive || "No value added yet.",
-            locked: false
-        },
-        {
-            title: "Base Active",
-            text: s.baseActive || "No value added yet.",
-            locked: false
-        },
-        {
-            title: "First Evolution",
-            text: s.firstEvolution || "No value added yet.",
-            locked: !s.unlocked.first
-        },
-        {
-            title: "Second Evolution",
-            text: s.secondEvolution || "No value added yet.",
-            locked: !s.unlocked.second
-        },
-        {
-            title: "Third Evolution",
-            text: s.thirdEvolution || "No value added yet.",
-            locked: !s.unlocked.third
-        },
-        {
-            title: "Ascended",
-            text: s.ascended || "No value added yet.",
-            locked: !s.unlocked.ascended
-        }
-    ];
-
+    const keys = ["base", "first", "second", "third", "ascended"];
     els.semblanceStages.innerHTML = "";
-    stages.forEach((stage) => {
+
+    keys.forEach((key) => {
+        const stage = c.semblance[key];
+        const locked = stageLocked(key, c);
+
         const card = document.createElement("div");
-        card.className = `sem-stage ${stage.locked ? "stage-locked" : ""}`;
+        card.className = `sem-stage ${locked ? "stage-locked" : ""}`;
         card.innerHTML = `
       <div class="sem-stage-header">
-        <div class="stage-name">${stage.title}</div>
-        <div class="stage-status">${stage.locked ? "Locked" : "Unlocked"}</div>
+        <div class="stage-name">${stageTitle(key)}</div>
+        <div class="stage-status">${locked ? "Locked" : "Unlocked"}</div>
       </div>
-      <div class="stage-description">${stage.text}</div>
+      <div class="stage-lines">
+        <div class="stage-line">
+          <strong>Active</strong>
+          <div>${stage.active || "No value added yet."}</div>
+        </div>
+        <div class="stage-line">
+          <strong>${stage.passiveName || "Passive"} [Passive]</strong>
+          <div>${stage.passiveDescription || "No passive description yet."}</div>
+        </div>
+        <div class="stage-line">
+          <strong>Aura Cost</strong>
+          <div>${stage.auraCost || 0}</div>
+        </div>
+      </div>
+      <div class="technique-actions">
+        <button class="neo-btn small use-semblance-btn" data-stage="${key}" ${locked ? "disabled" : ""}>Use Active</button>
+      </div>
     `;
         els.semblanceStages.appendChild(card);
+    });
+
+    els.semblanceStages.querySelectorAll(".use-semblance-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+            useSemblanceStage(btn.dataset.stage);
+        });
     });
 }
 
 function renderGrantedTechniques() {
     const c = getCharacter();
     const techniques = state.techniqueDatabase.filter((t) => c.grantedTechniqueIds.includes(t.id));
-
     els.grantedTechniques.innerHTML = "";
 
     if (!techniques.length) {
@@ -434,8 +537,83 @@ function renderGrantedTechniques() {
 
     els.grantedTechniques.querySelectorAll(".use-tech-btn").forEach((btn) => {
         btn.addEventListener("click", () => {
-            const techId = Number(btn.dataset.techId);
-            useTechnique(techId);
+            useTechnique(Number(btn.dataset.techId));
+        });
+    });
+}
+
+function renderDustInventory() {
+    const c = getCharacter();
+    els.dustInventoryGrid.innerHTML = "";
+
+    DUST_TYPES.forEach((type) => {
+        const dustClass = DUST_CLASS_MAP[type];
+        const amount = c.dustInventory[type] || 0;
+
+        const card = document.createElement("div");
+        card.className = `dust-card ${dustClass}`;
+        card.innerHTML = `
+      <label>${type}</label>
+      <input type="number" min="0" data-dust-type="${type}" value="${amount}" />
+    `;
+        els.dustInventoryGrid.appendChild(card);
+    });
+
+    els.dustInventoryGrid.querySelectorAll("input[data-dust-type]").forEach((input) => {
+        input.addEventListener("input", (e) => {
+            const type = e.target.dataset.dustType;
+            c.dustInventory[type] = Math.max(0, Number(e.target.value) || 0);
+            saveState();
+        });
+    });
+
+    els.dustSpellType.innerHTML = DUST_TYPES.map((type) => `<option value="${type}">${type}</option>`).join("");
+}
+
+function renderDustSpells() {
+    const c = getCharacter();
+    els.dustSpellList.innerHTML = "";
+
+    if (!c.dustSpells.length) {
+        els.dustSpellList.innerHTML = `
+      <div class="technique-card">
+        <strong>No Dust Spells created yet.</strong>
+      </div>
+    `;
+        return;
+    }
+
+    c.dustSpells.forEach((spell) => {
+        const card = document.createElement("div");
+        card.className = "technique-card";
+        card.innerHTML = `
+      <div class="technique-top">
+        <div>
+          <strong>${spell.name}</strong>
+          <div class="small-note">${spell.description}</div>
+        </div>
+        <div class="technique-meta">
+          <div class="meta-pill">${spell.type}</div>
+          <div class="meta-pill">Consumes 1</div>
+        </div>
+      </div>
+      <div class="dust-card-actions">
+        <button class="neo-btn small use-dust-spell-btn" data-spell-id="${spell.id}">Use Spell</button>
+        <button class="neo-btn small ghost delete-dust-spell-btn" data-spell-id="${spell.id}">Delete</button>
+      </div>
+    `;
+        els.dustSpellList.appendChild(card);
+    });
+
+    els.dustSpellList.querySelectorAll(".use-dust-spell-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+            useDustSpell(Number(btn.dataset.spellId));
+        });
+    });
+
+    els.dustSpellList.querySelectorAll(".delete-dust-spell-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+            deleteDustSpell(Number(btn.dataset.spellId));
         });
     });
 }
@@ -445,11 +623,7 @@ function renderDmTechniqueDatabase() {
     els.dmTechniqueDatabase.innerHTML = "";
 
     if (!state.techniqueDatabase.length) {
-        els.dmTechniqueDatabase.innerHTML = `
-      <div class="technique-card">
-        <strong>No techniques created yet.</strong>
-      </div>
-    `;
+        els.dmTechniqueDatabase.innerHTML = `<div class="technique-card"><strong>No techniques created yet.</strong></div>`;
         return;
     }
 
@@ -487,31 +661,49 @@ function renderDmTechniqueDatabase() {
             const action = btn.dataset.action;
             const techId = Number(btn.dataset.techId);
 
-            if (action === "grant-tech") {
-                toggleGrantTechnique(techId);
-            }
-
-            if (action === "delete-tech") {
-                deleteTechnique(techId);
-            }
+            if (action === "grant-tech") toggleGrantTechnique(techId);
+            if (action === "delete-tech") deleteTechnique(techId);
         });
     });
 }
 
 function renderDmSemblanceFields() {
-    const s = getCharacter().semblance;
+    const c = getCharacter();
+    const s = c.semblance;
 
-    els.dmBasePassive.value = s.basePassive;
-    els.dmBaseActive.value = s.baseActive;
-    els.dmFirstEvolution.value = s.firstEvolution;
-    els.dmSecondEvolution.value = s.secondEvolution;
-    els.dmThirdEvolution.value = s.thirdEvolution;
-    els.dmAscendedEvolution.value = s.ascended;
+    els.dmBaseActive.value = s.base.active;
+    els.dmBasePassiveName.value = s.base.passiveName;
+    els.dmBasePassiveDesc.value = s.base.passiveDescription;
+    els.dmBaseCost.value = s.base.auraCost;
+
+    els.dmFirstActive.value = s.first.active;
+    els.dmFirstPassiveName.value = s.first.passiveName;
+    els.dmFirstPassiveDesc.value = s.first.passiveDescription;
+    els.dmFirstCost.value = s.first.auraCost;
+
+    els.dmSecondActive.value = s.second.active;
+    els.dmSecondPassiveName.value = s.second.passiveName;
+    els.dmSecondPassiveDesc.value = s.second.passiveDescription;
+    els.dmSecondCost.value = s.second.auraCost;
+
+    els.dmThirdActive.value = s.third.active;
+    els.dmThirdPassiveName.value = s.third.passiveName;
+    els.dmThirdPassiveDesc.value = s.third.passiveDescription;
+    els.dmThirdCost.value = s.third.auraCost;
+
+    els.dmAscendedActive.value = s.ascended.active;
+    els.dmAscendedPassiveName.value = s.ascended.passiveName;
+    els.dmAscendedPassiveDesc.value = s.ascended.passiveDescription;
+    els.dmAscendedCost.value = s.ascended.auraCost;
 
     els.unlockFirst.checked = s.unlocked.first;
     els.unlockSecond.checked = s.unlocked.second;
     els.unlockThird.checked = s.unlocked.third;
     els.unlockAscended.checked = s.unlocked.ascended;
+
+    els.stateActive.checked = c.state === "active";
+    els.stateReserve.checked = c.state === "reserve";
+    els.stateDead.checked = c.state === "dead";
 }
 
 function renderTabs() {
@@ -525,6 +717,10 @@ function renderTabs() {
 }
 
 function render() {
+    const c = getCharacter();
+    ensureCurrentWithinMax(c);
+    saveState();
+
     renderCharacterTabs();
     renderHeader();
     renderMainFields();
@@ -532,6 +728,8 @@ function render() {
     renderSkills();
     renderSemblanceStages();
     renderGrantedTechniques();
+    renderDustInventory();
+    renderDustSpells();
     renderDmTechniqueDatabase();
     renderDmSemblanceFields();
     renderTabs();
@@ -541,7 +739,7 @@ function updateCharacterField(field, value) {
     const c = getCharacter();
 
     if (field === "name") c.name = value;
-    if (field === "level") c.level = Number(value) || 1;
+    if (field === "level") c.level = Math.max(1, Number(value) || 1);
     if (field === "race") c.race = value;
     if (field === "className") c.className = value;
     if (field === "age") c.age = value;
@@ -549,11 +747,11 @@ function updateCharacterField(field, value) {
     if (field === "semblanceName") c.semblanceName = value;
     if (field === "proficiencyBonus") c.proficiencyBonus = Number(value) || 0;
 
-    if (field === "currentHp") c.hp.current = Number(value) || 0;
-    if (field === "maxHp") c.hp.max = Number(value) || 0;
-    if (field === "currentAura") c.aura.current = Number(value) || 0;
-    if (field === "maxAura") c.aura.max = Number(value) || 0;
-    if (field === "armor") c.armor = Number(value) || 0;
+    if (field === "maxHp") c.hp.max = Math.max(0, Number(value) || 0);
+    if (field === "currentHp") c.hp.current = Math.max(0, Number(value) || 0);
+    if (field === "maxAura") c.aura.max = Math.max(0, Number(value) || 0);
+    if (field === "currentAura") c.aura.current = Math.max(0, Number(value) || 0);
+    if (field === "armor") c.armor = Math.max(0, Number(value) || 0);
     if (field === "initiative") c.initiative = value;
     if (field === "speed") c.speed = value;
 
@@ -562,6 +760,7 @@ function updateCharacterField(field, value) {
     if (field === "inventoryText") c.inventoryText = value;
     if (field === "notesText") c.notesText = value;
 
+    ensureCurrentWithinMax(c);
     saveState();
     render();
 }
@@ -631,6 +830,29 @@ function useTechnique(techId) {
     }
 
     c.aura.current -= tech.cost;
+    ensureCurrentWithinMax(c);
+    saveState();
+    render();
+}
+
+function useSemblanceStage(stageKey) {
+    const c = getCharacter();
+    const locked = stageLocked(stageKey, c);
+    if (locked) {
+        alert("That Semblance stage is still locked.");
+        return;
+    }
+
+    const stage = c.semblance[stageKey];
+    const cost = Math.max(0, Number(stage.auraCost) || 0);
+
+    if (c.aura.current < cost) {
+        alert("Not enough Aura Points.");
+        return;
+    }
+
+    c.aura.current -= cost;
+    ensureCurrentWithinMax(c);
     saveState();
     render();
 }
@@ -692,18 +914,110 @@ function deleteTechnique(techId) {
 function saveSemblanceFromDm() {
     const c = getCharacter();
 
-    c.semblance.basePassive = els.dmBasePassive.value;
-    c.semblance.baseActive = els.dmBaseActive.value;
-    c.semblance.firstEvolution = els.dmFirstEvolution.value;
-    c.semblance.secondEvolution = els.dmSecondEvolution.value;
-    c.semblance.thirdEvolution = els.dmThirdEvolution.value;
-    c.semblance.ascended = els.dmAscendedEvolution.value;
+    c.semblance.base.active = els.dmBaseActive.value;
+    c.semblance.base.passiveName = els.dmBasePassiveName.value;
+    c.semblance.base.passiveDescription = els.dmBasePassiveDesc.value;
+    c.semblance.base.auraCost = Math.max(0, Number(els.dmBaseCost.value) || 0);
+
+    c.semblance.first.active = els.dmFirstActive.value;
+    c.semblance.first.passiveName = els.dmFirstPassiveName.value;
+    c.semblance.first.passiveDescription = els.dmFirstPassiveDesc.value;
+    c.semblance.first.auraCost = Math.max(0, Number(els.dmFirstCost.value) || 0);
+
+    c.semblance.second.active = els.dmSecondActive.value;
+    c.semblance.second.passiveName = els.dmSecondPassiveName.value;
+    c.semblance.second.passiveDescription = els.dmSecondPassiveDesc.value;
+    c.semblance.second.auraCost = Math.max(0, Number(els.dmSecondCost.value) || 0);
+
+    c.semblance.third.active = els.dmThirdActive.value;
+    c.semblance.third.passiveName = els.dmThirdPassiveName.value;
+    c.semblance.third.passiveDescription = els.dmThirdPassiveDesc.value;
+    c.semblance.third.auraCost = Math.max(0, Number(els.dmThirdCost.value) || 0);
+
+    c.semblance.ascended.active = els.dmAscendedActive.value;
+    c.semblance.ascended.passiveName = els.dmAscendedPassiveName.value;
+    c.semblance.ascended.passiveDescription = els.dmAscendedPassiveDesc.value;
+    c.semblance.ascended.auraCost = Math.max(0, Number(els.dmAscendedCost.value) || 0);
 
     c.semblance.unlocked.first = els.unlockFirst.checked;
     c.semblance.unlocked.second = els.unlockSecond.checked;
     c.semblance.unlocked.third = els.unlockThird.checked;
     c.semblance.unlocked.ascended = els.unlockAscended.checked;
 
+    saveState();
+    render();
+}
+
+function saveCharacterState() {
+    const c = getCharacter();
+
+    if (els.stateActive.checked) c.state = "active";
+    if (els.stateReserve.checked) c.state = "reserve";
+    if (els.stateDead.checked) c.state = "dead";
+
+    if (c.state === "dead") {
+        c.hp.current = 0;
+        c.aura.current = 0;
+    }
+
+    saveState();
+    render();
+}
+
+function addCharacter() {
+    const newCharacter = blankCharacter(state.characters.length);
+    newCharacter.state = "reserve";
+    state.characters.push(newCharacter);
+    state.selectedCharacter = state.characters.length - 1;
+    state.showReserve = true;
+    saveState();
+    render();
+}
+
+function addDustSpell() {
+    const c = getCharacter();
+    const name = els.dustSpellName.value.trim();
+    const type = els.dustSpellType.value;
+    const description = els.dustSpellDescription.value.trim();
+
+    if (!name || !type || !description) {
+        alert("Fill out the Dust Spell form first.");
+        return;
+    }
+
+    c.dustSpells.push({
+        id: Date.now(),
+        name,
+        type,
+        description
+    });
+
+    els.dustSpellName.value = "";
+    els.dustSpellDescription.value = "";
+
+    saveState();
+    render();
+}
+
+function useDustSpell(spellId) {
+    const c = getCharacter();
+    const spell = c.dustSpells.find((s) => s.id === spellId);
+    if (!spell) return;
+
+    const amount = c.dustInventory[spell.type] || 0;
+    if (amount < 1) {
+        alert(`Not enough ${spell.type}.`);
+        return;
+    }
+
+    c.dustInventory[spell.type] -= 1;
+    saveState();
+    render();
+}
+
+function deleteDustSpell(spellId) {
+    const c = getCharacter();
+    c.dustSpells = c.dustSpells.filter((spell) => spell.id !== spellId);
     saveState();
     render();
 }
@@ -757,6 +1071,21 @@ function bindInputs() {
     els.restoreAuraBtn.addEventListener("click", restoreAura);
     els.createTechniqueBtn.addEventListener("click", createTechnique);
     els.saveSemblanceBtn.addEventListener("click", saveSemblanceFromDm);
+    els.saveCharacterStateBtn.addEventListener("click", saveCharacterState);
+    els.addCharacterBtn.addEventListener("click", addCharacter);
+    els.addDustSpellBtn.addEventListener("click", addDustSpell);
+
+    els.toggleReserveBtn.addEventListener("click", () => {
+        state.showReserve = !state.showReserve;
+        saveState();
+        render();
+    });
+
+    els.toggleDeadBtn.addEventListener("click", () => {
+        state.showDead = !state.showDead;
+        saveState();
+        render();
+    });
 }
 
 bindInputs();
