@@ -23,12 +23,12 @@ const DUST_CLASS_MAP = {
 };
 
 const SKILL_MAP = {
-    STR: ["Athletics"],
-    DEX: ["Acrobatics", "Sleight of Hand", "Stealth"],
-    CON: ["Endurance"],
-    INT: ["History", "Investigation", "Nature", "Religion", "Aura Master"],
-    WIS: ["Animal Handling", "Insight", "Medicine", "Perception", "Survival"],
-    CHA: ["Deception", "Intimidation", "Performance", "Persuasion"]
+    STR: ["Saving Throw","Athletics"],
+    DEX: ["Saving Throw", "Acrobatics", "Sleight of Hand", "Stealth"],
+    CON: ["Saving Throw", "Endurance"],
+    INT: ["Saving Throw", "History", "Investigation", "Nature", "Religion", "Aura Mastery"],
+    WIS: ["Saving Throw", "Animal Handling", "Insight", "Medicine", "Perception", "Survival"],
+    CHA: ["Saving Throw", "Deception", "Intimidation", "Performance", "Persuasion"]
 };
 
 function makeBlankSkills() {
