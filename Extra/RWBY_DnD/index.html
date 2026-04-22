@@ -2,21 +2,310 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <title>Picker Index</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Neon Sheet System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;800&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+<div class="bg-grid"></div>
+<div class="glow glow-cyan"></div>
+<div class="glow glow-pink"></div>
 
-<div class="container">
-    <h1>Select a Person</h1>
+<div class="app">
+    <aside class="sidebar panel">
+        <div class="brand">
+            <div class="micro">HOME BREW SYSTEM</div>
+            <h1>NEON SHEET</h1>
+            <p>Futuristic character management with player sheets and DM controls.</p>
+        </div>
 
-    <nav class="nav">
-        <a href="Players/Player1.html">Argen</a>
-        <a href="Players/Player2.html">Gamer</a>
-        <a href="Players/Player3.html">George</a>
-        <a href="Players/Player4.html">Adam</a>
-    </nav>
+        <div class="sidebar-section">
+            <div class="section-label">CHARACTERS</div>
+            <div id="characterTabs" class="character-tabs"></div>
+        </div>
+
+        <div class="sidebar-section">
+            <div class="section-label">RESOURCE TOOLS</div>
+            <div class="sidebar-buttons">
+                <button id="rollHpBtn" class="neo-btn">Roll HP</button>
+                <button id="rollAuraBtn" class="neo-btn">Roll Aura</button>
+                <button id="restoreAuraBtn" class="neo-btn ghost">Full Restore Aura</button>
+                <button id="restoreHpBtn" class="neo-btn ghost">Full Restore HP</button>
+            </div>
+        </div>
+
+        <div class="sidebar-section">
+            <div class="section-label">STATUS</div>
+            <div class="status-box">
+                <div><span>Selected:</span><strong id="selectedNameSmall">Player 1</strong></div>
+                <div><span>Ascended:</span><strong id="selectedAscendedStatus">Locked</strong></div>
+                <div><span>Granted Techniques:</span><strong id="selectedTechniqueCount">0</strong></div>
+            </div>
+        </div>
+    </aside>
+
+    <main class="main">
+        <header class="topbar panel">
+            <div>
+                <div class="section-label">ACTIVE SHEET</div>
+                <div id="topCharacterName" class="top-character-name">Player 1</div>
+            </div>
+
+            <div class="topbar-resources">
+                <div class="resource-mini hp-mini">
+                    <span>HP</span>
+                    <strong id="topHpMini">0 / 0</strong>
+                </div>
+                <div class="resource-mini aura-mini">
+                    <span>AURA</span>
+                    <strong id="topAuraMini">0 / 0</strong>
+                </div>
+                <div class="resource-mini armor-mini">
+                    <span>ARMOR</span>
+                    <strong id="topArmorMini">0</strong>
+                </div>
+            </div>
+        </header>
+
+        <section class="sheet-shell">
+            <div class="sheet-grid">
+                <div class="left-column">
+                    <section class="panel hero-panel">
+                        <div class="hero-header">
+                            <div class="hero-id">
+                                <div class="micro">CHARACTER FILE</div>
+                                <input id="charName" class="hero-name-input" type="text" placeholder="Character Name" />
+                            </div>
+                            <div class="hero-level-box">
+                                <label>LEVEL</label>
+                                <input id="charLevel" type="number" min="1" />
+                            </div>
+                        </div>
+
+                        <div class="identity-grid">
+                            <div class="field">
+                                <label>Race</label>
+                                <input id="charRace" type="text" placeholder="Race" />
+                            </div>
+                            <div class="field">
+                                <label>Class</label>
+                                <input id="charClass" type="text" placeholder="Class" />
+                            </div>
+                            <div class="field">
+                                <label>Age</label>
+                                <input id="charAge" type="text" placeholder="Age" />
+                            </div>
+                            <div class="field">
+                                <label>Background</label>
+                                <input id="charBackground" type="text" placeholder="Background" />
+                            </div>
+                            <div class="field">
+                                <label>Semblance Name</label>
+                                <input id="charSemblanceName" type="text" placeholder="Semblance Name" />
+                            </div>
+                            <div class="field">
+                                <label>Proficiency Bonus</label>
+                                <input id="charPB" type="number" />
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="panel resource-panel">
+                        <div class="resource-card">
+                            <div class="resource-head">
+                                <span>HIT POINTS</span>
+                                <strong id="hpDisplay">0 / 0</strong>
+                            </div>
+                            <div class="bar-track">
+                                <div id="hpBar" class="bar-fill hp-fill"></div>
+                            </div>
+                            <div class="resource-edit-grid">
+                                <div class="field">
+                                    <label>Current HP</label>
+                                    <input id="currentHp" type="number" />
+                                </div>
+                                <div class="field">
+                                    <label>Max HP</label>
+                                    <input id="maxHp" type="number" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="resource-card">
+                            <div class="resource-head">
+                                <span>AURA POINTS</span>
+                                <strong id="auraDisplay">0 / 0</strong>
+                            </div>
+                            <div class="bar-track">
+                                <div id="auraBar" class="bar-fill aura-fill"></div>
+                            </div>
+                            <div class="resource-edit-grid">
+                                <div class="field">
+                                    <label>Current Aura</label>
+                                    <input id="currentAura" type="number" />
+                                </div>
+                                <div class="field">
+                                    <label>Max Aura</label>
+                                    <input id="maxAura" type="number" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="resource-card armor-block">
+                            <div class="field">
+                                <label>Armor</label>
+                                <input id="armor" type="number" />
+                            </div>
+                            <div class="field">
+                                <label>Initiative</label>
+                                <input id="initiative" type="text" placeholder="+0" />
+                            </div>
+                            <div class="field">
+                                <label>Speed</label>
+                                <input id="speed" type="text" placeholder="30 ft" />
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="panel">
+                        <div class="section-title-row">
+                            <div class="section-title">STATS</div>
+                            <div class="small-note">Use + / - to point-buy or edit the value directly.</div>
+                        </div>
+                        <div id="statsGrid" class="stats-grid"></div>
+                    </section>
+
+                    <section class="panel">
+                        <div class="section-title">SEMBlANCE PROGRESSION</div>
+                        <div id="semblanceStages" class="semblance-stages"></div>
+                    </section>
+                </div>
+
+                <div class="right-column panel">
+                    <div class="tab-bar">
+                        <button class="tab-btn active" data-tab="skills">Skills</button>
+                        <button class="tab-btn" data-tab="weapons">Weapons</button>
+                        <button class="tab-btn" data-tab="abilities">Abilities</button>
+                        <button class="tab-btn" data-tab="inventory">Inventory</button>
+                        <button class="tab-btn" data-tab="notes">Notes</button>
+                        <button class="tab-btn" data-tab="aura-techniques">Aura Techniques</button>
+                        <button class="tab-btn dm-tab" data-tab="dm">DM Page</button>
+                    </div>
+
+                    <div id="tab-skills" class="tab-content active">
+                        <div class="section-title">SKILL MATRIX</div>
+                        <div id="skillsMatrix" class="skills-matrix"></div>
+                    </div>
+
+                    <div id="tab-weapons" class="tab-content">
+                        <div class="section-title">WEAPONS / ATTACKS</div>
+                        <textarea id="weaponsText" placeholder="Add attacks, weapons, bonuses, damage, special notes..."></textarea>
+                    </div>
+
+                    <div id="tab-abilities" class="tab-content">
+                        <div class="section-title">ABILITIES / FEATURES / FEATS</div>
+                        <textarea id="abilitiesText" placeholder="Add feats, passives, class features, traits..."></textarea>
+                    </div>
+
+                    <div id="tab-inventory" class="tab-content">
+                        <div class="section-title">INVENTORY</div>
+                        <textarea id="inventoryText" placeholder="Add inventory, money, items, equipment..."></textarea>
+                    </div>
+
+                    <div id="tab-notes" class="tab-content">
+                        <div class="section-title">NOTES</div>
+                        <textarea id="notesText" placeholder="Notes, lore, reminders, plans, session notes..."></textarea>
+                    </div>
+
+                    <div id="tab-aura-techniques" class="tab-content">
+                        <div class="section-title-row">
+                            <div class="section-title">GRANTED AURA TECHNIQUES</div>
+                            <div class="small-note">Players can use granted techniques. Only the DM can create and grant them.</div>
+                        </div>
+                        <div id="grantedTechniques" class="technique-list"></div>
+                    </div>
+
+                    <div id="tab-dm" class="tab-content">
+                        <div class="dm-layout">
+                            <section class="dm-panel-block">
+                                <div class="section-title">CREATE AURA TECHNIQUE</div>
+                                <div class="form-grid">
+                                    <div class="field">
+                                        <label>Name</label>
+                                        <input id="dmTechName" type="text" placeholder="Technique name" />
+                                    </div>
+                                    <div class="field">
+                                        <label>Level</label>
+                                        <input id="dmTechLevel" type="number" min="1" />
+                                    </div>
+                                    <div class="field">
+                                        <label>Cost</label>
+                                        <input id="dmTechCost" type="number" min="0" />
+                                    </div>
+                                    <div class="field">
+                                        <label>Type</label>
+                                        <input id="dmTechType" type="text" placeholder="Offense / Passive / Support..." />
+                                    </div>
+                                </div>
+                                <div class="field">
+                                    <label>Description</label>
+                                    <textarea id="dmTechDescription" class="small-textarea" placeholder="Technique description..."></textarea>
+                                </div>
+                                <button id="createTechniqueBtn" class="neo-btn">Create Technique</button>
+                            </section>
+
+                            <section class="dm-panel-block">
+                                <div class="section-title">TECHNIQUE DATABASE</div>
+                                <div id="dmTechniqueDatabase" class="dm-tech-list"></div>
+                            </section>
+
+                            <section class="dm-panel-block">
+                                <div class="section-title">SEMBlANCE CONTROL</div>
+                                <div class="field">
+                                    <label>Base Passive</label>
+                                    <textarea id="dmBasePassive" class="small-textarea" placeholder="Base passive"></textarea>
+                                </div>
+                                <div class="field">
+                                    <label>Base Active</label>
+                                    <textarea id="dmBaseActive" class="small-textarea" placeholder="Base active"></textarea>
+                                </div>
+                                <div class="field">
+                                    <label>First Evolution</label>
+                                    <textarea id="dmFirstEvolution" class="small-textarea" placeholder="First evolution"></textarea>
+                                </div>
+                                <div class="field">
+                                    <label>Second Evolution</label>
+                                    <textarea id="dmSecondEvolution" class="small-textarea" placeholder="Second evolution"></textarea>
+                                </div>
+                                <div class="field">
+                                    <label>Third Evolution</label>
+                                    <textarea id="dmThirdEvolution" class="small-textarea" placeholder="Third evolution"></textarea>
+                                </div>
+                                <div class="field">
+                                    <label>Ascended</label>
+                                    <textarea id="dmAscendedEvolution" class="small-textarea" placeholder="Ascended evolution"></textarea>
+                                </div>
+
+                                <div class="unlock-grid">
+                                    <label><input id="unlockFirst" type="checkbox" /> Unlock First</label>
+                                    <label><input id="unlockSecond" type="checkbox" /> Unlock Second</label>
+                                    <label><input id="unlockThird" type="checkbox" /> Unlock Third</label>
+                                    <label><input id="unlockAscended" type="checkbox" /> Unlock Ascended</label>
+                                </div>
+
+                                <button id="saveSemblanceBtn" class="neo-btn">Save Semblance Progression</button>
+                            </section>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
 </div>
 
+<script src="script.js"></script>
 </body>
 </html>
