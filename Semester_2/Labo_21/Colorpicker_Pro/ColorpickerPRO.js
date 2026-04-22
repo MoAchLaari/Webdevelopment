@@ -138,31 +138,42 @@ class ColorpickerPRO {
 
     updateBackground() {
         const container = document.getElementById('background-blobs');
-
-        // Clear old blobs
         container.innerHTML = '';
 
         if (this.state.swatches.length === 0) return;
 
-        this.state.swatches.forEach(color => {
-            const blob = document.createElement('div');
-            blob.className = 'blob';
+        const layers = [
+            { class: 'layer-1', count: 4, size: [400, 600] }, // far (big + slow)
+            { class: 'layer-2', count: 5, size: [300, 500] }, // mid
+            { class: 'layer-3', count: 6, size: [200, 400] }  // near (smaller + faster)
+        ];
 
-            blob.style.background = color;
+        layers.forEach(layer => {
+            for (let i = 0; i < layer.count; i++) {
+                const blob = document.createElement('div');
+                blob.className = `blob ${layer.class}`;
 
-            // Random position
-            blob.style.top = Math.random() * 80 + '%';
-            blob.style.left = Math.random() * 80 + '%';
+                // Pick random saved color
+                const color = this.state.swatches[
+                    Math.floor(Math.random() * this.state.swatches.length)
+                    ];
 
-            // Random animation delay for variation
-            blob.style.animationDelay = (Math.random() * 10) + 's';
+                blob.style.background = color;
 
-            // Random size variation
-            const size = 250 + Math.random() * 200;
-            blob.style.width = size + 'px';
-            blob.style.height = size + 'px';
+                // Full screen spread (not just center!)
+                blob.style.top = Math.random() * 100 + '%';
+                blob.style.left = Math.random() * 100 + '%';
 
-            container.appendChild(blob);
+                // Size variation
+                const size = layer.size[0] + Math.random() * (layer.size[1] - layer.size[0]);
+                blob.style.width = size + 'px';
+                blob.style.height = size + 'px';
+
+                // Random animation offset (VERY important for natural feel)
+                blob.style.animationDelay = (Math.random() * 20) + 's';
+
+                container.appendChild(blob);
+            }
         });
     }
 
