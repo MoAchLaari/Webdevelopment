@@ -229,6 +229,7 @@ const els = {
     restoreHpBtn: document.getElementById("restoreHpBtn"),
 
     addCharacterBtn: document.getElementById("addCharacterBtn"),
+    deleteCharacterBtn: document.getElementById("deleteCharacterBtn"),
     toggleReserveBtn: document.getElementById("toggleReserveBtn"),
     toggleDeadBtn: document.getElementById("toggleDeadBtn")
 };
@@ -974,6 +975,27 @@ function addCharacter() {
     render();
 }
 
+function deleteCharacter() {
+    if (state.characters.length <= 1) {
+        alert("You need to keep at least one character.");
+        return;
+    }
+
+    const current = getCharacter();
+    const name = current.name || `Character ${state.selectedCharacter + 1}`;
+    const confirmed = confirm(`Delete ${name}? This cannot be undone.`);
+    if (!confirmed) return;
+
+    state.characters.splice(state.selectedCharacter, 1);
+
+    if (state.selectedCharacter >= state.characters.length) {
+        state.selectedCharacter = state.characters.length - 1;
+    }
+
+    saveState();
+    render();
+}
+
 function addDustSpell() {
     const c = getCharacter();
     const name = els.dustSpellName.value.trim();
@@ -1073,6 +1095,7 @@ function bindInputs() {
     els.saveSemblanceBtn.addEventListener("click", saveSemblanceFromDm);
     els.saveCharacterStateBtn.addEventListener("click", saveCharacterState);
     els.addCharacterBtn.addEventListener("click", addCharacter);
+    els.deleteCharacterBtn.addEventListener("click", deleteCharacter);
     els.addDustSpellBtn.addEventListener("click", addDustSpell);
 
     els.toggleReserveBtn.addEventListener("click", () => {
