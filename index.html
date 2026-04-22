@@ -7,17 +7,28 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="Style.Css" />
+    <link rel="stylesheet" href="Style.css" />
 </head>
 <body>
+<div class="bg-effects" aria-hidden="true">
+    <div class="grid-overlay"></div>
+    <div class="noise-overlay"></div>
+    <div class="glow glow-1"></div>
+    <div class="glow glow-2"></div>
+    <div class="glow glow-3"></div>
+</div>
 
 <header class="topbar">
     <div class="topbar-inner">
         <div class="brand">
-            <div class="brand-mark" aria-hidden="true"></div>
+            <div class="brand-mark" aria-hidden="true">
+                <span></span>
+            </div>
+
             <div class="brand-text">
+                <p class="eyebrow">Digital Archive</p>
                 <h1>Web Development I</h1>
                 <p class="subtitle">Index van labo’s en oefeningen</p>
             </div>
@@ -25,7 +36,10 @@
 
         <div class="tools">
             <div class="search">
-                <input id="searchInput" type="search" placeholder="Zoek labo of opdracht..." autocomplete="off" />
+                <svg viewBox="0 0 24 24" aria-hidden="true" class="search-icon">
+                    <path d="M21 21l-4.35-4.35m1.85-5.15a7 7 0 1 1-14 0a7 7 0 0 1 14 0Z"/>
+                </svg>
+                <input id="searchInput" type="search" placeholder="Zoek labo, oefening of opdracht..." autocomplete="off" />
                 <span class="search-hint">Ctrl /</span>
             </div>
 
@@ -38,10 +52,38 @@
 </header>
 
 <main class="container">
+    <section class="hero-panel">
+        <div>
+            <p class="hero-kicker">SYSTEM OVERVIEW</p>
+            <h2>Browse all lab work faster.</h2>
+            <p class="hero-text">
+                Gebruik de zoekbalk om labo’s, oefeningen en opdrachten meteen te filteren.
+            </p>
+        </div>
+
+        <div class="hero-stats">
+            <div class="stat-box">
+                <span class="stat-label">Semesters</span>
+                <strong>2</strong>
+            </div>
+            <div class="stat-box">
+                <span class="stat-label">Labs</span>
+                <strong id="labCount">0</strong>
+            </div>
+            <div class="stat-box">
+                <span class="stat-label">Links</span>
+                <strong id="totalLinkCount">0</strong>
+            </div>
+        </div>
+    </section>
+
     <div class="grid">
         <section class="card">
             <div class="card-head">
-                <h2>Semester 1</h2>
+                <div>
+                    <p class="card-label">Archive Node</p>
+                    <h2>Semester 1</h2>
+                </div>
                 <span class="pill" id="countS1">— links</span>
             </div>
 
@@ -168,7 +210,10 @@
 
         <section class="card">
             <div class="card-head">
-                <h2>Semester 2</h2>
+                <div>
+                    <p class="card-label">Archive Node</p>
+                    <h2>Semester 2</h2>
+                </div>
                 <span class="pill" id="countS2">— links</span>
             </div>
 
@@ -243,13 +288,13 @@
                     <span class="meta"></span>
                 </summary>
                 <ol>
-                    <li><a href="Semester_2/Labo_18/Demo/Events/index.html"> Event </a></li>
-                    <li><a href="Semester_2/Labo_18/Demo/Event_Bubbling/index.html"> Event Bubbling </a></li>
-                    <li><a href="Semester_2/Labo_18/Demo/Keyword/index.html"> Keyword </a></li>
+                    <li><a href="Semester_2/Labo_18/Demo/Events/index.html">Event</a></li>
+                    <li><a href="Semester_2/Labo_18/Demo/Event_Bubbling/index.html">Event Bubbling</a></li>
+                    <li><a href="Semester_2/Labo_18/Demo/Keyword/index.html">Keyword</a></li>
                     <li><a href="Semester_2/Labo_18/Oefening_1/Index.html">Oefening 1</a></li>
                     <li><a href="Semester_2/Labo_18/Oefening_2/Index.html">Oefening 2</a></li>
                     <li><a href="Semester_2/Labo_18/Oefening_3/Index.html">Oefening 3</a></li>
-                    <li><a href="Semester_2/Labo_18/Colorpicker_2/Colorpicker.html"> Color Picker</a></li>
+                    <li><a href="Semester_2/Labo_18/Colorpicker_2/Colorpicker.html">Color Picker</a></li>
                 </ol>
             </details>
 
@@ -259,10 +304,10 @@
                     <span class="meta"></span>
                 </summary>
                 <ol>
-                    <li><a href="Semester_2/Labo_19/Demo_sprites/Demo%20sprites/index.html"> Sprites </a></li>
-                    <li><a href="Semester_2/Labo_19/Demo_sprites/Demo%20sprites%20animatie/index.html"> Sprites </a></li>
-                    <li><a href="Semester_2/Labo_19/Hit_an_object_Startproject/index.html"> Hit an Object </a></li>
-                    <li><a href="Semester_2/Labo_19/Matching_Game/index.html"> Matching Game </a></li>
+                    <li><a href="Semester_2/Labo_19/Demo_sprites/Demo%20sprites/index.html">Sprites</a></li>
+                    <li><a href="Semester_2/Labo_19/Demo_sprites/Demo%20sprites%20animatie/index.html">Sprites Animatie</a></li>
+                    <li><a href="Semester_2/Labo_19/Hit_an_object_Startproject/index.html">Hit an Object</a></li>
+                    <li><a href="Semester_2/Labo_19/Matching_Game/index.html">Matching Game</a></li>
                 </ol>
             </details>
 
@@ -272,9 +317,9 @@
                     <span class="meta"></span>
                 </summary>
                 <ol>
-                    <li><a href="Semester_2/Labo_20/Contactmanager/index.html"> Contact Manager </a></li>
-                    <li><a href="Semester_2/Labo_20/Oefening%201/index.html"> Oefening 1 </a></li>
-                    <li><a href="Semester_2/Labo_20/Oefening_2/index.html"> Sprites </a></li>
+                    <li><a href="Semester_2/Labo_20/Contactmanager/index.html">Contact Manager</a></li>
+                    <li><a href="Semester_2/Labo_20/Oefening%201/index.html">Oefening 1</a></li>
+                    <li><a href="Semester_2/Labo_20/Oefening_2/index.html">Sprites</a></li>
                 </ol>
             </details>
 
@@ -284,39 +329,21 @@
                     <span class="meta"></span>
                 </summary>
                 <ol>
-                    <li><a href="Semester_2/Labo_21/Colorpicker_Pro/ColorpickerPRO.html"> Colorpicker Pro </a></li>
+                    <li><a href="Semester_2/Labo_21/Colorpicker_Pro/ColorpickerPRO.html">Colorpicker Pro</a></li>
                 </ol>
             </details>
         </section>
-
-<!--        <section class="card">-->
-<!--            <div class="card-head">-->
-<!--                <h2>Extra</h2>-->
-<!--                <span class="pill" id="countS3">— links</span>-->
-<!--            </div>-->
-
-<!--            <details class="lab">-->
-<!--                <summary>-->
-<!--                    <span>The Wheel</span>-->
-<!--                    <span class="meta"></span>-->
-<!--                </summary>-->
-<!--                <ol>-->
-<!--                    <li><a href="Extra/The%20Wheel/index.html">The Wheel</a></li>-->
-<!--                </ol>-->
-<!--            </details>-->
-<!--        </section>-->
-
-
     </div>
 
     <p class="empty-state" id="emptyState" hidden>
-        Geen resultaten. Probeer een andere zoekterm.
+        Geen resultaten gevonden. Probeer een andere zoekterm.
     </p>
 </main>
 
 <footer class="footer">
-    <p>© 2025 Web Development I | Mohammed Achraf Laari</p>
+    <p>© 2025 Web Development I <span class="footer-sep">|</span> Mohammed Achraf Laari</p>
 </footer>
-<script type="text/javascript" charset="utf-8" src="script.js"></script>
+
+<script src="script.js"></script>
 </body>
 </html>

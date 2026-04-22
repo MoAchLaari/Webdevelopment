@@ -1,22 +1,55 @@
 (function () {
-    const $ = (sel, root = document) => root.querySelector(sel);
-    const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
+    const $ = (selector, root = document) => root.querySelector(selector);
+    const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
 
     const searchInput = $("#searchInput");
     const emptyState = $("#emptyState");
     const openAllBtn = $("#openAllBtn");
     const closeAllBtn = $("#closeAllBtn");
+    const labCount = $("#labCount");
+    const totalLinkCount = $("#totalLinkCount");
 
     const allDetails = $$("details.lab");
     const allLinks = $$("a[href]");
     const semesterCards = $$(".card");
+
+    // Small helper to safely escape user search text for RegExp
+    function escapeRegExp(text) {
+        return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    }
+
+    // Remove previous highlight markup
+    function clearHighlights(root = document) {
+        $$("mark", root).forEach(mark => {
+            const textNode = document.createTextNode(mark.textContent);
+            mark.replaceWith(textNode);
+        });
+    }
+
+    // Highlight matching text inside links and summary labels
+    function highlightText(element, query) {
+        if (!element) return;
+
+        const original = element.dataset.originalText || element.textContent;
+        element.dataset.originalText = original;
+
+        if (!query) {
+            element.innerHTML = original;
+            return;
+        }
+
+        const regex = new RegExp(`(${escapeRegExp(query)})`, "gi");
+        element.innerHTML = original.replace(regex, "<mark>$1</mark>");
+    }
 
     // Keyboard shortcut: Ctrl + /
     document.addEventListener("keydown", (e) => {
         if (e.ctrlKey && e.key === "/") {
             e.preventDefault();
             searchInput.focus();
+            searchInput.select();
         }
+
         if (e.key === "Escape") {
             searchInput.value = "";
             applyFilter("");
@@ -24,62 +57,90 @@
         }
     });
 
-    // Add counts per lab + per semester
-    allDetails.forEach(d => {
-        const count = $$("ol a[href]", d).length;
-        const meta = $(".meta", d);
-        if (meta) meta.textContent = count ? `${count} links` : "";
+    // Count links inside each lab and show in the meta text
+    allDetails.forEach(detail => {
+        const count = $$("ol a[href]", detail).length;
+        const meta = $(".meta", detail);
+        if (meta) meta.textContent = count ? `${count} links` : "0 links";
     });
 
+    function updateOverviewCounts() {
+        const visibleLabs = allDetails.filter(detail => !detail.hidden).length;
+        const visibleLinks = allLinks.filter(link => !link.closest("li")?.hidden).length;
+
+        if (labCount) labCount.textContent = visibleLabs;
+        if (totalLinkCount) totalLinkCount.textContent = visibleLinks;
+    }
+
     function updateSemesterCounts() {
-        const cards = semesterCards;
-        cards.forEach(card => {
-            const visibleLinks = $$("a[href]", card).filter(a => a.closest("details") && !a.closest("details").hidden);
-            const pill = card.querySelector(".pill");
+        semesterCards.forEach(card => {
+            const visibleLinks = $$("a[href]", card).filter(link => !link.closest("li")?.hidden && !link.closest("details")?.hidden);
+            const pill = $(".pill", card);
             if (pill) pill.textContent = `${visibleLinks.length} links`;
         });
     }
 
-    function applyFilter(raw) {
-        const q = raw.trim().toLowerCase();
-        let anyVisible = false;
+    function applyFilter(rawValue) {
+        const query = rawValue.trim().toLowerCase();
+        let anythingVisible = false;
 
-        allDetails.forEach(d => {
-            const summaryText = $("summary", d).innerText.toLowerCase();
-            const items = $$("ol li", d);
+        clearHighlights();
 
-            let hasMatchInThisLab = false;
+        allDetails.forEach(detail => {
+            const summaryLabel = $("summary > span:first-child", detail);
+            const summaryText = summaryLabel ? summaryLabel.textContent.toLowerCase() : "";
+            const items = $$("ol li", detail);
 
-            items.forEach(li => {
-                const text = li.innerText.toLowerCase();
-                const match = !q || text.includes(q) || summaryText.includes(q);
-                li.hidden = !match;
-                if (match) hasMatchInThisLab = true;
+            let hasMatchInLab = false;
+
+            items.forEach(item => {
+                const itemText = item.textContent.toLowerCase();
+                const matches = !query || itemText.includes(query) || summaryText.includes(query);
+
+                item.hidden = !matches;
+
+                const link = $("a", item);
+                if (link) highlightText(link, query);
+
+                if (matches) hasMatchInLab = true;
             });
 
-            // Hide entire lab if nothing matches (except when q empty)
-            d.hidden = !!q && !hasMatchInThisLab && !summaryText.includes(q);
+            if (summaryLabel) highlightText(summaryLabel, query);
 
-            // Auto-open labs when searching so results are visible
-            if (q && !d.hidden && hasMatchInThisLab) d.open = true;
+            detail.hidden = !!query && !hasMatchInLab && !summaryText.includes(query);
 
-            if (!d.hidden) anyVisible = true;
+            if (query && !detail.hidden) {
+                detail.open = true;
+            }
+
+            if (!detail.hidden) {
+                anythingVisible = true;
+            }
         });
 
-        emptyState.hidden = anyVisible;
+        emptyState.hidden = anythingVisible;
+
         updateSemesterCounts();
+        updateOverviewCounts();
     }
 
-    searchInput.addEventListener("input", (e) => applyFilter(e.target.value));
+    searchInput.addEventListener("input", (e) => {
+        applyFilter(e.target.value);
+    });
 
     openAllBtn.addEventListener("click", () => {
-        allDetails.forEach(d => { if (!d.hidden) d.open = true; });
+        allDetails.forEach(detail => {
+            if (!detail.hidden) detail.open = true;
+        });
     });
 
     closeAllBtn.addEventListener("click", () => {
-        allDetails.forEach(d => d.open = false);
+        allDetails.forEach(detail => {
+            detail.open = false;
+        });
     });
 
-    // Initial counts
+    // Initial overview values
     updateSemesterCounts();
+    updateOverviewCounts();
 })();
