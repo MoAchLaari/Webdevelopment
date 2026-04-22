@@ -9,7 +9,7 @@ class StorageUtil {
     }
 }
 
-class ColorPicker {
+class ColorpickerPRO {
     constructor() {
         this.state = {
             currentColor: '',
@@ -61,9 +61,9 @@ class ColorPicker {
     setColor(color) {
         this.state.currentColor = color;
         this.elements.colorBox.style.backgroundColor = color;
-        this.elements.hexDisplay.textContent = ColorPicker.rgbToHex(color);
+        this.elements.hexDisplay.textContent = ColorpickerPRO.rgbToHex(color);
 
-        const rgb = ColorPicker.parseRGB(color);
+        const rgb = ColorpickerPRO.parseRGB(color);
         if (rgb) this.updateSliders(...rgb);
 
         StorageUtil.set(this.storage.currentColorKey, color);
@@ -150,7 +150,7 @@ class ColorPicker {
     }
 
     copyColorToClipboard() {
-        const hex = ColorPicker.rgbToHex(this.state.currentColor);
+        const hex = ColorpickerPRO.rgbToHex(this.state.currentColor);
 
         navigator.clipboard.writeText(hex).then(() => {
             this.elements.hexDisplay.textContent = "Copied!";
@@ -165,4 +165,4 @@ class ColorPicker {
     }
 }
 
-window.addEventListener('load', () => new ColorPicker());
+window.addEventListener('load', () => new ColorpickerPRO());
