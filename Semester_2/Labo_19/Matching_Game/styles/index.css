@@ -7,7 +7,7 @@ body {
     font-family: Arial, sans-serif;
 
     /* Wallpaper support */
-    background: url("rathian.jpg") no-repeat center center fixed;
+    background: url("rathian.jpg")no-repeat center center fixed;
     background-size: cover;
 }
 
