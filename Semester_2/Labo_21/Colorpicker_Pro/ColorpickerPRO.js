@@ -143,9 +143,9 @@ class ColorpickerPRO {
         if (this.state.swatches.length === 0) return;
 
         const layers = [
-            { class: 'layer-1', count: 4, size: [400, 600] }, // far (big + slow)
-            { class: 'layer-2', count: 5, size: [300, 500] }, // mid
-            { class: 'layer-3', count: 6, size: [200, 400] }  // near (smaller + faster)
+            { class: 'layer-1', count: 5, size: [500, 800] },
+            { class: 'layer-2', count: 6, size: [350, 600] },
+            { class: 'layer-3', count: 7, size: [250, 450] }
         ];
 
         layers.forEach(layer => {
@@ -153,24 +153,21 @@ class ColorpickerPRO {
                 const blob = document.createElement('div');
                 blob.className = `blob ${layer.class}`;
 
-                // Pick random saved color
                 const color = this.state.swatches[
                     Math.floor(Math.random() * this.state.swatches.length)
                     ];
 
                 blob.style.background = color;
 
-                // Full screen spread (not just center!)
+                // TRUE full screen positioning
                 blob.style.top = Math.random() * 100 + '%';
                 blob.style.left = Math.random() * 100 + '%';
 
-                // Size variation
                 const size = layer.size[0] + Math.random() * (layer.size[1] - layer.size[0]);
                 blob.style.width = size + 'px';
                 blob.style.height = size + 'px';
 
-                // Random animation offset (VERY important for natural feel)
-                blob.style.animationDelay = (Math.random() * 20) + 's';
+                blob.style.animationDelay = Math.random() * 20 + 's';
 
                 container.appendChild(blob);
             }
