@@ -1,4 +1,4 @@
-const STORAGE_KEY = "neon-sheet-system-v3";
+const STORAGE_KEY = "neon-sheet-system-v4";
 
 const STAT_ORDER = ["STR", "DEX", "CON", "INT", "WIS", "CHA"];
 
@@ -23,7 +23,7 @@ const DUST_CLASS_MAP = {
 };
 
 const SKILL_MAP = {
-    STR: ["STR Saving Throw","Athletics"],
+    STR: ["STR Saving Throw", "Athletics"],
     DEX: ["DEX Saving Throw", "Acrobatics", "Sleight of Hand", "Stealth"],
     CON: ["CON Saving Throw", "Endurance"],
     INT: ["INT Saving Throw", "Aura Mastery", "History", "Investigation", "Nature", "Religion"],
@@ -44,6 +44,7 @@ function makeBlankSkills() {
 function blankStage() {
     return {
         active: "",
+        activeDescription: "",
         passiveName: "",
         passiveDescription: "",
         auraCost: 0
@@ -193,26 +194,31 @@ const els = {
     saveCharacterStateBtn: document.getElementById("saveCharacterStateBtn"),
 
     dmBaseActive: document.getElementById("dmBaseActive"),
+    dmBaseActiveDesc: document.getElementById("dmBaseActiveDesc"),
     dmBasePassiveName: document.getElementById("dmBasePassiveName"),
     dmBasePassiveDesc: document.getElementById("dmBasePassiveDesc"),
     dmBaseCost: document.getElementById("dmBaseCost"),
 
     dmFirstActive: document.getElementById("dmFirstActive"),
+    dmFirstActiveDesc: document.getElementById("dmFirstActiveDesc"),
     dmFirstPassiveName: document.getElementById("dmFirstPassiveName"),
     dmFirstPassiveDesc: document.getElementById("dmFirstPassiveDesc"),
     dmFirstCost: document.getElementById("dmFirstCost"),
 
     dmSecondActive: document.getElementById("dmSecondActive"),
+    dmSecondActiveDesc: document.getElementById("dmSecondActiveDesc"),
     dmSecondPassiveName: document.getElementById("dmSecondPassiveName"),
     dmSecondPassiveDesc: document.getElementById("dmSecondPassiveDesc"),
     dmSecondCost: document.getElementById("dmSecondCost"),
 
     dmThirdActive: document.getElementById("dmThirdActive"),
+    dmThirdActiveDesc: document.getElementById("dmThirdActiveDesc"),
     dmThirdPassiveName: document.getElementById("dmThirdPassiveName"),
     dmThirdPassiveDesc: document.getElementById("dmThirdPassiveDesc"),
     dmThirdCost: document.getElementById("dmThirdCost"),
 
     dmAscendedActive: document.getElementById("dmAscendedActive"),
+    dmAscendedActiveDesc: document.getElementById("dmAscendedActiveDesc"),
     dmAscendedPassiveName: document.getElementById("dmAscendedPassiveName"),
     dmAscendedPassiveDesc: document.getElementById("dmAscendedPassiveDesc"),
     dmAscendedCost: document.getElementById("dmAscendedCost"),
@@ -238,7 +244,29 @@ function loadState() {
     try {
         const raw = localStorage.getItem(STORAGE_KEY);
         if (!raw) return structuredClone(defaultState);
-        return JSON.parse(raw);
+        const loaded = JSON.parse(raw);
+
+        loaded.characters?.forEach((character) => {
+            character.skills = character.skills || makeBlankSkills();
+
+            Object.entries(SKILL_MAP).forEach(([stat, list]) => {
+                list.forEach((skill) => {
+                    if (!character.skills[skill]) {
+                        character.skills[skill] = { stat, bonus: 0 };
+                    }
+                });
+            });
+
+            const stages = ["base", "first", "second", "third", "ascended"];
+            stages.forEach((stageKey) => {
+                if (!character.semblance[stageKey]) character.semblance[stageKey] = blankStage();
+                if (typeof character.semblance[stageKey].activeDescription !== "string") {
+                    character.semblance[stageKey].activeDescription = "";
+                }
+            });
+        });
+
+        return loaded;
     } catch {
         return structuredClone(defaultState);
     }
@@ -414,12 +442,13 @@ function renderSkills() {
 
         skills.forEach((skillName) => {
             const skillData = c.skills[skillName] || { stat, bonus: 0 };
+            const displayName = skillName.includes("Saving Throw") ? "Saving Throw" : skillName;
 
             const row = document.createElement("div");
             row.className = "skill-row";
             row.innerHTML = `
         <div class="skill-row-label">
-          <strong>${skillName}</strong>
+          <strong>${displayName}</strong>
           <span>Falls under ${stat}</span>
         </div>
         <input type="number" data-skill="${skillName}" value="${skillData.bonus}" />
@@ -473,8 +502,8 @@ function renderSemblanceStages() {
       </div>
       <div class="stage-lines">
         <div class="stage-line">
-          <strong>Active</strong>
-          <div>${stage.active || "No value added yet."}</div>
+          <strong>${stage.active || "Active"}</strong>
+          <div>${stage.activeDescription || "No active description yet."}</div>
         </div>
         <div class="stage-line">
           <strong>${stage.passiveName || "Passive"} [Passive]</strong>
@@ -673,26 +702,31 @@ function renderDmSemblanceFields() {
     const s = c.semblance;
 
     els.dmBaseActive.value = s.base.active;
+    els.dmBaseActiveDesc.value = s.base.activeDescription;
     els.dmBasePassiveName.value = s.base.passiveName;
     els.dmBasePassiveDesc.value = s.base.passiveDescription;
     els.dmBaseCost.value = s.base.auraCost;
 
     els.dmFirstActive.value = s.first.active;
+    els.dmFirstActiveDesc.value = s.first.activeDescription;
     els.dmFirstPassiveName.value = s.first.passiveName;
     els.dmFirstPassiveDesc.value = s.first.passiveDescription;
     els.dmFirstCost.value = s.first.auraCost;
 
     els.dmSecondActive.value = s.second.active;
+    els.dmSecondActiveDesc.value = s.second.activeDescription;
     els.dmSecondPassiveName.value = s.second.passiveName;
     els.dmSecondPassiveDesc.value = s.second.passiveDescription;
     els.dmSecondCost.value = s.second.auraCost;
 
     els.dmThirdActive.value = s.third.active;
+    els.dmThirdActiveDesc.value = s.third.activeDescription;
     els.dmThirdPassiveName.value = s.third.passiveName;
     els.dmThirdPassiveDesc.value = s.third.passiveDescription;
     els.dmThirdCost.value = s.third.auraCost;
 
     els.dmAscendedActive.value = s.ascended.active;
+    els.dmAscendedActiveDesc.value = s.ascended.activeDescription;
     els.dmAscendedPassiveName.value = s.ascended.passiveName;
     els.dmAscendedPassiveDesc.value = s.ascended.passiveDescription;
     els.dmAscendedCost.value = s.ascended.auraCost;
@@ -916,26 +950,31 @@ function saveSemblanceFromDm() {
     const c = getCharacter();
 
     c.semblance.base.active = els.dmBaseActive.value;
+    c.semblance.base.activeDescription = els.dmBaseActiveDesc.value;
     c.semblance.base.passiveName = els.dmBasePassiveName.value;
     c.semblance.base.passiveDescription = els.dmBasePassiveDesc.value;
     c.semblance.base.auraCost = Math.max(0, Number(els.dmBaseCost.value) || 0);
 
     c.semblance.first.active = els.dmFirstActive.value;
+    c.semblance.first.activeDescription = els.dmFirstActiveDesc.value;
     c.semblance.first.passiveName = els.dmFirstPassiveName.value;
     c.semblance.first.passiveDescription = els.dmFirstPassiveDesc.value;
     c.semblance.first.auraCost = Math.max(0, Number(els.dmFirstCost.value) || 0);
 
     c.semblance.second.active = els.dmSecondActive.value;
+    c.semblance.second.activeDescription = els.dmSecondActiveDesc.value;
     c.semblance.second.passiveName = els.dmSecondPassiveName.value;
     c.semblance.second.passiveDescription = els.dmSecondPassiveDesc.value;
     c.semblance.second.auraCost = Math.max(0, Number(els.dmSecondCost.value) || 0);
 
     c.semblance.third.active = els.dmThirdActive.value;
+    c.semblance.third.activeDescription = els.dmThirdActiveDesc.value;
     c.semblance.third.passiveName = els.dmThirdPassiveName.value;
     c.semblance.third.passiveDescription = els.dmThirdPassiveDesc.value;
     c.semblance.third.auraCost = Math.max(0, Number(els.dmThirdCost.value) || 0);
 
     c.semblance.ascended.active = els.dmAscendedActive.value;
+    c.semblance.ascended.activeDescription = els.dmAscendedActiveDesc.value;
     c.semblance.ascended.passiveName = els.dmAscendedPassiveName.value;
     c.semblance.ascended.passiveDescription = els.dmAscendedPassiveDesc.value;
     c.semblance.ascended.auraCost = Math.max(0, Number(els.dmAscendedCost.value) || 0);
