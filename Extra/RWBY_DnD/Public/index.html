@@ -125,9 +125,7 @@
                                 <span>HIT POINTS</span>
                                 <strong id="hpDisplay">0 / 0</strong>
                             </div>
-                            <div class="bar-track">
-                                <div id="hpBar" class="bar-fill hp-fill"></div>
-                            </div>
+                            <div class="bar-track"><div id="hpBar" class="bar-fill hp-fill"></div></div>
                             <div class="resource-edit-grid">
                                 <div class="field">
                                     <label>Current HP</label>
@@ -145,9 +143,7 @@
                                 <span>AURA POINTS</span>
                                 <strong id="auraDisplay">0 / 0</strong>
                             </div>
-                            <div class="bar-track">
-                                <div id="auraBar" class="bar-fill aura-fill"></div>
-                            </div>
+                            <div class="bar-track"><div id="auraBar" class="bar-fill aura-fill"></div></div>
                             <div class="resource-edit-grid">
                                 <div class="field">
                                     <label>Current Aura</label>
@@ -199,7 +195,7 @@
                         <button class="tab-btn" data-tab="inventory">Inventory</button>
                         <button class="tab-btn" data-tab="notes">Notes</button>
                         <button class="tab-btn" data-tab="aura-techniques">Aura Techniques</button>
-                        <button class="tab-btn dm-tab" data-tab="dm">DM Page</button>
+                        <button id="openDmOverlayBtn" class="tab-btn dm-tab" type="button">DM Page</button>
                     </div>
 
                     <div id="tab-skills" class="tab-content active">
@@ -222,7 +218,6 @@
                             <div class="section-title">DUST INVENTORY</div>
                             <div class="small-note">Using a Dust Spell consumes one of its selected dust type.</div>
                         </div>
-
                         <div id="dustInventoryGrid" class="dust-grid"></div>
 
                         <div class="section-title">CREATE DUST SPELL</div>
@@ -243,7 +238,6 @@
                         </div>
 
                         <button id="addDustSpellBtn" class="neo-btn">Add Dust Spell</button>
-
                         <div class="section-title dust-spell-gap">CREATED DUST SPELLS</div>
                         <div id="dustSpellList" class="technique-list"></div>
                     </div>
@@ -260,177 +254,10 @@
 
                     <div id="tab-aura-techniques" class="tab-content">
                         <div class="section-title-row">
-                            <div class="section-title">GRANTED AURA TECHNIQUES</div>
-                            <div class="small-note">Players can use granted techniques. Only the DM can create and grant them.</div>
+                            <div class="section-title">AURA TECHNIQUES</div>
+                            <div class="small-note">Each player has their own version. Click to expand.</div>
                         </div>
                         <div id="grantedTechniques" class="technique-list"></div>
-                    </div>
-
-                    <div id="tab-dm" class="tab-content">
-                        <div class="dm-layout">
-                            <section class="dm-panel-block">
-                                <div class="section-title">CREATE AURA TECHNIQUE</div>
-                                <div class="form-grid">
-                                    <div class="field">
-                                        <label>Name</label>
-                                        <input id="dmTechName" type="text" placeholder="Technique name" />
-                                    </div>
-                                    <div class="field">
-                                        <label>Level</label>
-                                        <input id="dmTechLevel" type="number" min="1" />
-                                    </div>
-                                    <div class="field">
-                                        <label>Cost</label>
-                                        <input id="dmTechCost" type="number" min="0" />
-                                    </div>
-                                    <div class="field">
-                                        <label>Type</label>
-                                        <input id="dmTechType" type="text" placeholder="Offense / Passive / Support..." />
-                                    </div>
-                                </div>
-                                <div class="field">
-                                    <label>Description</label>
-                                    <textarea id="dmTechDescription" class="small-textarea" placeholder="Technique description..."></textarea>
-                                </div>
-                                <button id="createTechniqueBtn" class="neo-btn">Create Technique</button>
-                            </section>
-
-                            <section class="dm-panel-block">
-                                <div class="section-title">TECHNIQUE DATABASE</div>
-                                <div id="dmTechniqueDatabase" class="dm-tech-list"></div>
-                            </section>
-
-                            <section class="dm-panel-block">
-                                <div class="section-title">CHARACTER STATE</div>
-                                <div class="unlock-grid">
-                                    <label><input id="stateActive" type="radio" name="charState" value="active" /> Active</label>
-                                    <label><input id="stateReserve" type="radio" name="charState" value="reserve" /> Reserve</label>
-                                    <label><input id="stateDead" type="radio" name="charState" value="dead" /> Dead</label>
-                                </div>
-                                <div class="dm-tech-actions">
-                                    <button id="saveCharacterStateBtn" class="neo-btn">Save Character State</button>
-                                    <button id="deleteCharacterBtn" class="neo-btn ghost">Delete Character</button>
-                                </div>
-                            </section>
-
-                            <section class="dm-panel-block">
-                                <div class="section-title">SEMBLANCE CONTROL</div>
-
-                                <div class="field">
-                                    <label>Base Active Name</label>
-                                    <input id="dmBaseActive" type="text" placeholder="Base active name" />
-                                </div>
-                                <div class="field">
-                                    <label>Base Active Description</label>
-                                    <textarea id="dmBaseActiveDesc" class="small-textarea" placeholder="Base active description"></textarea>
-                                </div>
-                                <div class="field">
-                                    <label>Base Passive Name</label>
-                                    <input id="dmBasePassiveName" type="text" placeholder="Passive name" />
-                                </div>
-                                <div class="field">
-                                    <label>Base Passive Description</label>
-                                    <textarea id="dmBasePassiveDesc" class="small-textarea" placeholder="Base passive description"></textarea>
-                                </div>
-                                <div class="field">
-                                    <label>Base Aura Cost</label>
-                                    <input id="dmBaseCost" type="number" min="0" />
-                                </div>
-
-                                <div class="field">
-                                    <label>First Evolution Active Name</label>
-                                    <input id="dmFirstActive" type="text" placeholder="First evolution active name" />
-                                </div>
-                                <div class="field">
-                                    <label>First Evolution Active Description</label>
-                                    <textarea id="dmFirstActiveDesc" class="small-textarea" placeholder="First evolution active description"></textarea>
-                                </div>
-                                <div class="field">
-                                    <label>First Evolution Passive Name</label>
-                                    <input id="dmFirstPassiveName" type="text" placeholder="Passive name" />
-                                </div>
-                                <div class="field">
-                                    <label>First Evolution Passive Description</label>
-                                    <textarea id="dmFirstPassiveDesc" class="small-textarea" placeholder="First evolution passive description"></textarea>
-                                </div>
-                                <div class="field">
-                                    <label>First Evolution Aura Cost</label>
-                                    <input id="dmFirstCost" type="number" min="0" />
-                                </div>
-
-                                <div class="field">
-                                    <label>Second Evolution Active Name</label>
-                                    <input id="dmSecondActive" type="text" placeholder="Second evolution active name" />
-                                </div>
-                                <div class="field">
-                                    <label>Second Evolution Active Description</label>
-                                    <textarea id="dmSecondActiveDesc" class="small-textarea" placeholder="Second evolution active description"></textarea>
-                                </div>
-                                <div class="field">
-                                    <label>Second Evolution Passive Name</label>
-                                    <input id="dmSecondPassiveName" type="text" placeholder="Passive name" />
-                                </div>
-                                <div class="field">
-                                    <label>Second Evolution Passive Description</label>
-                                    <textarea id="dmSecondPassiveDesc" class="small-textarea" placeholder="Second evolution passive description"></textarea>
-                                </div>
-                                <div class="field">
-                                    <label>Second Evolution Aura Cost</label>
-                                    <input id="dmSecondCost" type="number" min="0" />
-                                </div>
-
-                                <div class="field">
-                                    <label>Third Evolution Active Name</label>
-                                    <input id="dmThirdActive" type="text" placeholder="Third evolution active name" />
-                                </div>
-                                <div class="field">
-                                    <label>Third Evolution Active Description</label>
-                                    <textarea id="dmThirdActiveDesc" class="small-textarea" placeholder="Third evolution active description"></textarea>
-                                </div>
-                                <div class="field">
-                                    <label>Third Evolution Passive Name</label>
-                                    <input id="dmThirdPassiveName" type="text" placeholder="Passive name" />
-                                </div>
-                                <div class="field">
-                                    <label>Third Evolution Passive Description</label>
-                                    <textarea id="dmThirdPassiveDesc" class="small-textarea" placeholder="Third evolution passive description"></textarea>
-                                </div>
-                                <div class="field">
-                                    <label>Third Evolution Aura Cost</label>
-                                    <input id="dmThirdCost" type="number" min="0" />
-                                </div>
-
-                                <div class="field">
-                                    <label>Ascended Active Name</label>
-                                    <input id="dmAscendedActive" type="text" placeholder="Ascended active name" />
-                                </div>
-                                <div class="field">
-                                    <label>Ascended Active Description</label>
-                                    <textarea id="dmAscendedActiveDesc" class="small-textarea" placeholder="Ascended active description"></textarea>
-                                </div>
-                                <div class="field">
-                                    <label>Ascended Passive Name</label>
-                                    <input id="dmAscendedPassiveName" type="text" placeholder="Passive name" />
-                                </div>
-                                <div class="field">
-                                    <label>Ascended Passive Description</label>
-                                    <textarea id="dmAscendedPassiveDesc" class="small-textarea" placeholder="Ascended passive description"></textarea>
-                                </div>
-                                <div class="field">
-                                    <label>Ascended Aura Cost</label>
-                                    <input id="dmAscendedCost" type="number" min="0" />
-                                </div>
-
-                                <div class="unlock-grid">
-                                    <label><input id="unlockFirst" type="checkbox" /> Unlock First</label>
-                                    <label><input id="unlockSecond" type="checkbox" /> Unlock Second</label>
-                                    <label><input id="unlockThird" type="checkbox" /> Unlock Third</label>
-                                    <label><input id="unlockAscended" type="checkbox" /> Unlock Ascended</label>
-                                </div>
-
-                                <button id="saveSemblanceBtn" class="neo-btn">Save Semblance Progression</button>
-                            </section>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -438,6 +265,147 @@
     </main>
 </div>
 
-<script src="script.js"></script>
+<div id="dmOverlay" class="dm-overlay hidden">
+    <div class="dm-overlay-inner">
+        <div class="dm-login panel" id="dmLoginPanel">
+            <div class="section-title">DM ACCESS</div>
+            <p class="small-note">Enter the DM password.</p>
+            <input id="dmPasswordInput" type="password" placeholder="DM password" />
+            <div class="dm-overlay-actions">
+                <button id="dmLoginBtn" class="neo-btn">Enter</button>
+                <button id="dmCloseBtn" class="neo-btn ghost">Close</button>
+            </div>
+        </div>
+
+        <div class="dm-fullscreen panel hidden" id="dmFullscreenPanel">
+            <div class="dm-fullscreen-top">
+                <div>
+                    <div class="section-label">DM SCREEN</div>
+                    <div class="top-character-name" id="dmSelectedCharacterName">Character</div>
+                </div>
+                <div class="dm-overlay-actions">
+                    <button id="dmLogoutBtn" class="neo-btn ghost">Lock</button>
+                    <button id="dmCloseFullBtn" class="neo-btn">Close</button>
+                </div>
+            </div>
+
+            <div class="dm-sections">
+                <details class="collapse-block" open>
+                    <summary class="collapse-summary">Character State</summary>
+                    <div class="collapse-body">
+                        <div class="unlock-grid">
+                            <label><input id="stateActive" type="radio" name="charState" value="active" /> Active</label>
+                            <label><input id="stateReserve" type="radio" name="charState" value="reserve" /> Reserve</label>
+                            <label><input id="stateDead" type="radio" name="charState" value="dead" /> Dead</label>
+                        </div>
+                        <div class="dm-tech-actions">
+                            <button id="saveCharacterStateBtn" class="neo-btn">Save Character State</button>
+                            <button id="deleteCharacterBtn" class="neo-btn ghost">Delete Character</button>
+                        </div>
+                    </div>
+                </details>
+
+                <details class="collapse-block" open>
+                    <summary class="collapse-summary">Semblance Control</summary>
+                    <div class="collapse-body">
+                        <div class="dm-two-col">
+                            <div>
+                                <div class="section-label">Base</div>
+                                <div class="field"><label>Active Name</label><input id="dmBaseActive" type="text" /></div>
+                                <div class="field"><label>Active Description</label><textarea id="dmBaseActiveDesc" class="small-textarea"></textarea></div>
+                                <div class="field"><label>Passive Name</label><input id="dmBasePassiveName" type="text" /></div>
+                                <div class="field"><label>Passive Description</label><textarea id="dmBasePassiveDesc" class="small-textarea"></textarea></div>
+                                <div class="field"><label>Aura Cost</label><input id="dmBaseCost" type="number" min="0" /></div>
+                            </div>
+
+                            <div>
+                                <div class="section-label">First Evolution</div>
+                                <div class="field"><label>Active Name</label><input id="dmFirstActive" type="text" /></div>
+                                <div class="field"><label>Active Description</label><textarea id="dmFirstActiveDesc" class="small-textarea"></textarea></div>
+                                <div class="field"><label>Passive Name</label><input id="dmFirstPassiveName" type="text" /></div>
+                                <div class="field"><label>Passive Description</label><textarea id="dmFirstPassiveDesc" class="small-textarea"></textarea></div>
+                                <div class="field"><label>Aura Cost</label><input id="dmFirstCost" type="number" min="0" /></div>
+                            </div>
+
+                            <div>
+                                <div class="section-label">Second Evolution</div>
+                                <div class="field"><label>Active Name</label><input id="dmSecondActive" type="text" /></div>
+                                <div class="field"><label>Active Description</label><textarea id="dmSecondActiveDesc" class="small-textarea"></textarea></div>
+                                <div class="field"><label>Passive Name</label><input id="dmSecondPassiveName" type="text" /></div>
+                                <div class="field"><label>Passive Description</label><textarea id="dmSecondPassiveDesc" class="small-textarea"></textarea></div>
+                                <div class="field"><label>Aura Cost</label><input id="dmSecondCost" type="number" min="0" /></div>
+                            </div>
+
+                            <div>
+                                <div class="section-label">Third Evolution</div>
+                                <div class="field"><label>Active Name</label><input id="dmThirdActive" type="text" /></div>
+                                <div class="field"><label>Active Description</label><textarea id="dmThirdActiveDesc" class="small-textarea"></textarea></div>
+                                <div class="field"><label>Passive Name</label><input id="dmThirdPassiveName" type="text" /></div>
+                                <div class="field"><label>Passive Description</label><textarea id="dmThirdPassiveDesc" class="small-textarea"></textarea></div>
+                                <div class="field"><label>Aura Cost</label><input id="dmThirdCost" type="number" min="0" /></div>
+                            </div>
+
+                            <div>
+                                <div class="section-label">Ascended</div>
+                                <div class="field"><label>Active Name</label><input id="dmAscendedActive" type="text" /></div>
+                                <div class="field"><label>Active Description</label><textarea id="dmAscendedActiveDesc" class="small-textarea"></textarea></div>
+                                <div class="field"><label>Passive Name</label><input id="dmAscendedPassiveName" type="text" /></div>
+                                <div class="field"><label>Passive Description</label><textarea id="dmAscendedPassiveDesc" class="small-textarea"></textarea></div>
+                                <div class="field"><label>Aura Cost</label><input id="dmAscendedCost" type="number" min="0" /></div>
+                            </div>
+                        </div>
+
+                        <div class="unlock-grid">
+                            <label><input id="unlockFirst" type="checkbox" /> Unlock First</label>
+                            <label><input id="unlockSecond" type="checkbox" /> Unlock Second</label>
+                            <label><input id="unlockThird" type="checkbox" /> Unlock Third</label>
+                            <label><input id="unlockAscended" type="checkbox" /> Unlock Ascended</label>
+                        </div>
+
+                        <button id="saveSemblanceBtn" class="neo-btn">Save Semblance Progression</button>
+                    </div>
+                </details>
+
+                <details class="collapse-block" open>
+                    <summary class="collapse-summary">Create Technique For Selected Player</summary>
+                    <div class="collapse-body">
+                        <div class="form-grid">
+                            <div class="field">
+                                <label>Name</label>
+                                <input id="dmTechName" type="text" placeholder="Technique name" />
+                            </div>
+                            <div class="field">
+                                <label>Level</label>
+                                <input id="dmTechLevel" type="number" min="1" />
+                            </div>
+                            <div class="field">
+                                <label>Cost</label>
+                                <input id="dmTechCost" type="number" min="0" />
+                            </div>
+                            <div class="field">
+                                <label>Type</label>
+                                <input id="dmTechType" type="text" placeholder="Offense / Passive / Support..." />
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label>Description</label>
+                            <textarea id="dmTechDescription" class="small-textarea"></textarea>
+                        </div>
+                        <button id="createTechniqueBtn" class="neo-btn">Add To Selected Player</button>
+                    </div>
+                </details>
+
+                <details class="collapse-block" open>
+                    <summary class="collapse-summary">Selected Player Techniques</summary>
+                    <div class="collapse-body">
+                        <div id="dmTechniqueDatabase" class="dm-tech-list"></div>
+                    </div>
+                </details>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="module" src="script.js"></script>
 </body>
 </html>

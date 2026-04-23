@@ -1,4 +1,5 @@
-const STORAGE_KEY = "neon-sheet-system-v4";
+const API_STATE = "/api/state";
+const API_DM_LOGIN = "/api/dm-login";
 
 const STAT_ORDER = ["STR", "DEX", "CON", "INT", "WIS", "CHA"];
 
@@ -58,7 +59,7 @@ function blankCharacter(index) {
     });
 
     return {
-        id: Date.now() + index,
+        id: `char-${Date.now()}-${index}`,
         name: "",
         race: "",
         className: "",
@@ -68,35 +69,20 @@ function blankCharacter(index) {
         semblanceName: "",
         proficiencyBonus: 2,
         state: index < 4 ? "active" : "reserve",
-
-        stats: {
-            STR: 10,
-            DEX: 10,
-            CON: 10,
-            INT: 10,
-            WIS: 10,
-            CHA: 10
-        },
-
+        stats: { STR: 10, DEX: 10, CON: 10, INT: 10, WIS: 10, CHA: 10 },
         skills: makeBlankSkills(),
-
         hp: { current: 0, max: 0 },
         aura: { current: 0, max: 0 },
-
         armor: 0,
         initiative: "",
         speed: "",
-
         weaponsText: "",
         abilitiesText: "",
         inventoryText: "",
         notesText: "",
-
-        grantedTechniqueIds: [],
-
         dustInventory,
         dustSpells: [],
-
+        techniques: [],
         semblance: {
             base: blankStage(),
             first: blankStage(),
@@ -123,12 +109,18 @@ const defaultState = {
         blankCharacter(1),
         blankCharacter(2),
         blankCharacter(3)
-    ],
-    techniqueDatabase: []
+    ]
 };
 
-let state = loadState();
+let state = structuredClone(defaultState);
+let dmUnlocked = false;
+let saveTimer = null;
+let pollTimer = null;
+let lastStateString = "";
 
+/* =========================
+   ELEMENTS
+========================= */
 const els = {
     characterTabs: document.getElementById("characterTabs"),
     selectedNameSmall: document.getElementById("selectedNameSmall"),
@@ -237,45 +229,116 @@ const els = {
     addCharacterBtn: document.getElementById("addCharacterBtn"),
     deleteCharacterBtn: document.getElementById("deleteCharacterBtn"),
     toggleReserveBtn: document.getElementById("toggleReserveBtn"),
-    toggleDeadBtn: document.getElementById("toggleDeadBtn")
+    toggleDeadBtn: document.getElementById("toggleDeadBtn"),
+
+    openDmOverlayBtn: document.getElementById("openDmOverlayBtn"),
+    dmOverlay: document.getElementById("dmOverlay"),
+    dmLoginPanel: document.getElementById("dmLoginPanel"),
+    dmFullscreenPanel: document.getElementById("dmFullscreenPanel"),
+    dmPasswordInput: document.getElementById("dmPasswordInput"),
+    dmLoginBtn: document.getElementById("dmLoginBtn"),
+    dmCloseBtn: document.getElementById("dmCloseBtn"),
+    dmCloseFullBtn: document.getElementById("dmCloseFullBtn"),
+    dmLogoutBtn: document.getElementById("dmLogoutBtn"),
+    dmSelectedCharacterName: document.getElementById("dmSelectedCharacterName")
 };
 
-function loadState() {
-    try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (!raw) return structuredClone(defaultState);
-        const loaded = JSON.parse(raw);
+/* =========================
+   SERVER STATE
+========================= */
+async function loadRemoteState() {
+    const res = await fetch(API_STATE, { cache: "no-store" });
+    if (!res.ok) throw new Error("Failed to load shared state.");
+    const data = await res.json();
+    state = normalizeState(data);
+    lastStateString = JSON.stringify(state);
+    render();
+}
 
-        loaded.characters?.forEach((character) => {
-            character.skills = character.skills || makeBlankSkills();
+async function saveRemoteState() {
+    const stateString = JSON.stringify(state);
+    lastStateString = stateString;
 
-            Object.entries(SKILL_MAP).forEach(([stat, list]) => {
-                list.forEach((skill) => {
-                    if (!character.skills[skill]) {
-                        character.skills[skill] = { stat, bonus: 0 };
-                    }
-                });
-            });
+    const res = await fetch(API_STATE, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: stateString
+    });
 
-            const stages = ["base", "first", "second", "third", "ascended"];
-            stages.forEach((stageKey) => {
-                if (!character.semblance[stageKey]) character.semblance[stageKey] = blankStage();
-                if (typeof character.semblance[stageKey].activeDescription !== "string") {
-                    character.semblance[stageKey].activeDescription = "";
-                }
-            });
-        });
-
-        return loaded;
-    } catch {
-        return structuredClone(defaultState);
+    if (!res.ok) {
+        console.error("Failed to save state.");
     }
 }
 
-function saveState() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+function scheduleSave() {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => {
+        saveRemoteState();
+    }, 200);
 }
 
+async function pollRemoteState() {
+    try {
+        const res = await fetch(API_STATE, { cache: "no-store" });
+        if (!res.ok) return;
+        const data = await res.json();
+        const incomingString = JSON.stringify(data);
+
+        if (incomingString !== lastStateString) {
+            state = normalizeState(data);
+            lastStateString = incomingString;
+            render();
+        }
+    } catch (err) {
+        console.error("Polling failed:", err);
+    }
+}
+
+function startPolling() {
+    clearInterval(pollTimer);
+    pollTimer = setInterval(pollRemoteState, 2000);
+}
+
+function normalizeState(loaded) {
+    const merged = structuredClone(defaultState);
+    Object.assign(merged, loaded || {});
+
+    merged.characters = (loaded?.characters?.length ? loaded.characters : defaultState.characters).map((character, index) => {
+        const base = blankCharacter(index);
+        const mergedChar = { ...base, ...character };
+
+        mergedChar.stats = { ...base.stats, ...(character.stats || {}) };
+        mergedChar.hp = { ...base.hp, ...(character.hp || {}) };
+        mergedChar.aura = { ...base.aura, ...(character.aura || {}) };
+        mergedChar.dustInventory = { ...base.dustInventory, ...(character.dustInventory || {}) };
+        mergedChar.skills = { ...base.skills, ...(character.skills || {}) };
+        mergedChar.dustSpells = Array.isArray(character.dustSpells) ? character.dustSpells : [];
+        mergedChar.techniques = Array.isArray(character.techniques) ? character.techniques : [];
+
+        mergedChar.semblance = {
+            ...base.semblance,
+            ...(character.semblance || {}),
+            base: { ...base.semblance.base, ...(character.semblance?.base || {}) },
+            first: { ...base.semblance.first, ...(character.semblance?.first || {}) },
+            second: { ...base.semblance.second, ...(character.semblance?.second || {}) },
+            third: { ...base.semblance.third, ...(character.semblance?.third || {}) },
+            ascended: { ...base.semblance.ascended, ...(character.semblance?.ascended || {}) },
+            unlocked: { ...base.semblance.unlocked, ...(character.semblance?.unlocked || {}) }
+        };
+
+        return mergedChar;
+    });
+
+    if (merged.selectedCharacter >= merged.characters.length) {
+        merged.selectedCharacter = Math.max(0, merged.characters.length - 1);
+    }
+
+    return merged;
+}
+
+/* =========================
+   HELPERS
+========================= */
 function getCharacter() {
     return state.characters[state.selectedCharacter] || state.characters[0];
 }
@@ -311,10 +374,28 @@ function visibleCharacters() {
     });
 }
 
+function stageLocked(stageKey, character) {
+    if (stageKey === "base") return false;
+    return !character.semblance.unlocked[stageKey];
+}
+
+function stageTitle(stageKey) {
+    return {
+        base: "Base",
+        first: "First Evolution",
+        second: "Second Evolution",
+        third: "Third Evolution",
+        ascended: "Ascended"
+    }[stageKey];
+}
+
+/* =========================
+   RENDER
+========================= */
 function renderCharacterTabs() {
     els.characterTabs.innerHTML = "";
-
     const visible = visibleCharacters();
+
     if (!visible.length) {
         els.characterTabs.innerHTML = `<div class="character-tab"><strong>No characters visible</strong><span>Toggle reserve or dead to see more.</span></div>`;
         return;
@@ -330,7 +411,7 @@ function renderCharacterTabs() {
     `;
         tab.addEventListener("click", () => {
             state.selectedCharacter = actualIndex;
-            saveState();
+            scheduleSave();
             render();
         });
         els.characterTabs.appendChild(tab);
@@ -345,11 +426,11 @@ function renderHeader() {
     els.topAuraMini.textContent = `${c.aura.current} / ${c.aura.max}`;
     els.topArmorMini.textContent = c.armor;
     els.selectedAscendedStatus.textContent = c.semblance.unlocked.ascended ? "Unlocked" : "Locked";
-    els.selectedTechniqueCount.textContent = c.grantedTechniqueIds.length;
+    els.selectedTechniqueCount.textContent = c.techniques.length;
     els.selectedState.textContent = c.state.charAt(0).toUpperCase() + c.state.slice(1);
-
     els.toggleReserveBtn.textContent = state.showReserve ? "Hide Reserve" : "Show Reserve";
     els.toggleDeadBtn.textContent = state.showDead ? "Hide Dead" : "Show Dead";
+    els.dmSelectedCharacterName.textContent = c.name || `Character ${state.selectedCharacter + 1}`;
 }
 
 function renderMainFields() {
@@ -383,7 +464,6 @@ function renderMainFields() {
 
     const hpWidth = c.hp.max > 0 ? (c.hp.current / c.hp.max) * 100 : 0;
     const auraWidth = c.aura.max > 0 ? (c.aura.current / c.aura.max) * 100 : 0;
-
     els.hpBar.style.width = `${clamp(hpWidth, 0, 100)}%`;
     els.auraBar.style.width = `${clamp(auraWidth, 0, 100)}%`;
 }
@@ -415,7 +495,7 @@ function renderStats() {
         input.addEventListener("input", (e) => {
             const stat = e.target.dataset.stat;
             c.stats[stat] = Number(e.target.value) || 0;
-            saveState();
+            scheduleSave();
             render();
         });
     });
@@ -428,8 +508,8 @@ function renderSkills() {
     Object.entries(SKILL_MAP).forEach(([stat, skills]) => {
         const group = document.createElement("div");
         group.className = "skill-group";
-
         const statMod = modifierFromScore(c.stats[stat]);
+
         group.innerHTML = `
       <div class="skill-group-header">
         <strong>${stat}</strong>
@@ -463,25 +543,9 @@ function renderSkills() {
         input.addEventListener("input", (e) => {
             const skill = e.target.dataset.skill;
             c.skills[skill].bonus = Number(e.target.value) || 0;
-            saveState();
+            scheduleSave();
         });
     });
-}
-
-function stageLocked(stageKey, character) {
-    if (stageKey === "base") return false;
-    return !character.semblance.unlocked[stageKey];
-}
-
-function stageTitle(stageKey) {
-    const names = {
-        base: "Base",
-        first: "First Evolution",
-        second: "Second Evolution",
-        third: "Third Evolution",
-        ascended: "Ascended"
-    };
-    return names[stageKey];
 }
 
 function renderSemblanceStages() {
@@ -496,27 +560,33 @@ function renderSemblanceStages() {
         const card = document.createElement("div");
         card.className = `sem-stage ${locked ? "stage-locked" : ""}`;
         card.innerHTML = `
-      <div class="sem-stage-header">
-        <div class="stage-name">${stageTitle(key)}</div>
-        <div class="stage-status">${locked ? "Locked" : "Unlocked"}</div>
-      </div>
-      <div class="stage-lines">
-        <div class="stage-line">
-          <strong>${stage.active || "Active"}</strong>
-          <div>${stage.activeDescription || "No active description yet."}</div>
+      <details class="collapse-block" ${locked ? "" : "open"}>
+        <summary class="collapse-summary">
+          <div class="sem-stage-header">
+            <div class="stage-name">${stageTitle(key)}</div>
+            <div class="stage-status">${locked ? "Locked" : "Unlocked"}</div>
+          </div>
+        </summary>
+        <div class="collapse-body">
+          <div class="stage-lines">
+            <div class="stage-line">
+              <strong>${stage.active || "Active"}</strong>
+              <div>${stage.activeDescription || "No active description yet."}</div>
+            </div>
+            <div class="stage-line">
+              <strong>${stage.passiveName || "Passive"} [Passive]</strong>
+              <div>${stage.passiveDescription || "No passive description yet."}</div>
+            </div>
+            <div class="stage-line">
+              <strong>Aura Cost</strong>
+              <div>${stage.auraCost || 0}</div>
+            </div>
+          </div>
+          <div class="technique-actions">
+            <button class="neo-btn small use-semblance-btn" data-stage="${key}" ${locked ? "disabled" : ""}>Use Active</button>
+          </div>
         </div>
-        <div class="stage-line">
-          <strong>${stage.passiveName || "Passive"} [Passive]</strong>
-          <div>${stage.passiveDescription || "No passive description yet."}</div>
-        </div>
-        <div class="stage-line">
-          <strong>Aura Cost</strong>
-          <div>${stage.auraCost || 0}</div>
-        </div>
-      </div>
-      <div class="technique-actions">
-        <button class="neo-btn small use-semblance-btn" data-stage="${key}" ${locked ? "disabled" : ""}>Use Active</button>
-      </div>
+      </details>
     `;
         els.semblanceStages.appendChild(card);
     });
@@ -530,44 +600,47 @@ function renderSemblanceStages() {
 
 function renderGrantedTechniques() {
     const c = getCharacter();
-    const techniques = state.techniqueDatabase.filter((t) => c.grantedTechniqueIds.includes(t.id));
     els.grantedTechniques.innerHTML = "";
 
-    if (!techniques.length) {
+    if (!c.techniques.length) {
         els.grantedTechniques.innerHTML = `
       <div class="technique-card">
-        <strong>No granted Aura Techniques.</strong>
-        <div class="small-note">The DM needs to create and grant them first.</div>
+        <strong>No Aura Techniques.</strong>
+        <div class="small-note">The DM needs to add them for this player.</div>
       </div>
     `;
         return;
     }
 
-    techniques.forEach((tech) => {
+    c.techniques.forEach((tech) => {
         const card = document.createElement("div");
         card.className = "technique-card";
         card.innerHTML = `
-      <div class="technique-top">
-        <div>
-          <strong>${tech.name}</strong>
+      <details class="collapse-block">
+        <summary class="collapse-summary">
+          <div class="technique-top">
+            <div><strong>${tech.name}</strong></div>
+            <div class="technique-meta">
+              <div class="meta-pill">Lvl ${tech.level}</div>
+              <div class="meta-pill">Cost ${tech.cost}</div>
+              <div class="meta-pill">${tech.type}</div>
+            </div>
+          </div>
+        </summary>
+        <div class="collapse-body">
           <div class="small-note">${tech.description}</div>
+          <div class="technique-actions">
+            <button class="neo-btn small use-tech-btn" data-tech-id="${tech.id}">Use Technique</button>
+          </div>
         </div>
-        <div class="technique-meta">
-          <div class="meta-pill">Lvl ${tech.level}</div>
-          <div class="meta-pill">Cost ${tech.cost}</div>
-          <div class="meta-pill">${tech.type}</div>
-        </div>
-      </div>
-      <div class="technique-actions">
-        <button class="neo-btn small use-tech-btn" data-tech-id="${tech.id}">Use Technique</button>
-      </div>
+      </details>
     `;
         els.grantedTechniques.appendChild(card);
     });
 
     els.grantedTechniques.querySelectorAll(".use-tech-btn").forEach((btn) => {
         btn.addEventListener("click", () => {
-            useTechnique(Number(btn.dataset.techId));
+            useTechnique(btn.dataset.techId);
         });
     });
 }
@@ -593,7 +666,7 @@ function renderDustInventory() {
         input.addEventListener("input", (e) => {
             const type = e.target.dataset.dustType;
             c.dustInventory[type] = Math.max(0, Number(e.target.value) || 0);
-            saveState();
+            scheduleSave();
         });
     });
 
@@ -605,11 +678,7 @@ function renderDustSpells() {
     els.dustSpellList.innerHTML = "";
 
     if (!c.dustSpells.length) {
-        els.dustSpellList.innerHTML = `
-      <div class="technique-card">
-        <strong>No Dust Spells created yet.</strong>
-      </div>
-    `;
+        els.dustSpellList.innerHTML = `<div class="technique-card"><strong>No Dust Spells created yet.</strong></div>`;
         return;
     }
 
@@ -617,33 +686,37 @@ function renderDustSpells() {
         const card = document.createElement("div");
         card.className = "technique-card";
         card.innerHTML = `
-      <div class="technique-top">
-        <div>
-          <strong>${spell.name}</strong>
+      <details class="collapse-block">
+        <summary class="collapse-summary">
+          <div class="technique-top">
+            <div><strong>${spell.name}</strong></div>
+            <div class="technique-meta">
+              <div class="meta-pill">${spell.type}</div>
+              <div class="meta-pill">Consumes 1</div>
+            </div>
+          </div>
+        </summary>
+        <div class="collapse-body">
           <div class="small-note">${spell.description}</div>
+          <div class="dust-card-actions">
+            <button class="neo-btn small use-dust-spell-btn" data-spell-id="${spell.id}">Use Spell</button>
+            <button class="neo-btn small ghost delete-dust-spell-btn" data-spell-id="${spell.id}">Delete</button>
+          </div>
         </div>
-        <div class="technique-meta">
-          <div class="meta-pill">${spell.type}</div>
-          <div class="meta-pill">Consumes 1</div>
-        </div>
-      </div>
-      <div class="dust-card-actions">
-        <button class="neo-btn small use-dust-spell-btn" data-spell-id="${spell.id}">Use Spell</button>
-        <button class="neo-btn small ghost delete-dust-spell-btn" data-spell-id="${spell.id}">Delete</button>
-      </div>
+      </details>
     `;
         els.dustSpellList.appendChild(card);
     });
 
     els.dustSpellList.querySelectorAll(".use-dust-spell-btn").forEach((btn) => {
         btn.addEventListener("click", () => {
-            useDustSpell(Number(btn.dataset.spellId));
+            useDustSpell(btn.dataset.spellId);
         });
     });
 
     els.dustSpellList.querySelectorAll(".delete-dust-spell-btn").forEach((btn) => {
         btn.addEventListener("click", () => {
-            deleteDustSpell(Number(btn.dataset.spellId));
+            deleteDustSpell(btn.dataset.spellId);
         });
     });
 }
@@ -652,47 +725,75 @@ function renderDmTechniqueDatabase() {
     const c = getCharacter();
     els.dmTechniqueDatabase.innerHTML = "";
 
-    if (!state.techniqueDatabase.length) {
-        els.dmTechniqueDatabase.innerHTML = `<div class="technique-card"><strong>No techniques created yet.</strong></div>`;
+    if (!c.techniques.length) {
+        els.dmTechniqueDatabase.innerHTML = `<div class="technique-card"><strong>No techniques for this player yet.</strong></div>`;
         return;
     }
 
-    state.techniqueDatabase.forEach((tech) => {
-        const granted = c.grantedTechniqueIds.includes(tech.id);
-
+    c.techniques.forEach((tech) => {
         const card = document.createElement("div");
         card.className = "technique-card";
         card.innerHTML = `
-      <div class="technique-top">
-        <div>
-          <strong>${tech.name}</strong>
-          <div class="small-note">${tech.description}</div>
+      <details class="collapse-block">
+        <summary class="collapse-summary">
+          <div class="technique-top">
+            <div><strong>${tech.name}</strong></div>
+            <div class="technique-meta">
+              <div class="meta-pill">Lvl ${tech.level}</div>
+              <div class="meta-pill">Cost ${tech.cost}</div>
+              <div class="meta-pill">${tech.type}</div>
+            </div>
+          </div>
+        </summary>
+        <div class="collapse-body">
+          <div class="form-grid">
+            <div class="field">
+              <label>Name</label>
+              <input type="text" data-edit-tech="${tech.id}" data-field="name" value="${tech.name}" />
+            </div>
+            <div class="field">
+              <label>Level</label>
+              <input type="number" data-edit-tech="${tech.id}" data-field="level" value="${tech.level}" />
+            </div>
+            <div class="field">
+              <label>Cost</label>
+              <input type="number" data-edit-tech="${tech.id}" data-field="cost" value="${tech.cost}" />
+            </div>
+            <div class="field">
+              <label>Type</label>
+              <input type="text" data-edit-tech="${tech.id}" data-field="type" value="${tech.type}" />
+            </div>
+          </div>
+          <div class="field">
+            <label>Description</label>
+            <textarea class="small-textarea" data-edit-tech="${tech.id}" data-field="description">${tech.description}</textarea>
+          </div>
+          <div class="dm-tech-actions">
+            <button class="neo-btn small ghost" data-delete-tech="${tech.id}">Delete</button>
+          </div>
         </div>
-        <div class="technique-meta">
-          <div class="meta-pill">Lvl ${tech.level}</div>
-          <div class="meta-pill">Cost ${tech.cost}</div>
-          <div class="meta-pill">${tech.type}</div>
-        </div>
-      </div>
-      <div class="dm-tech-actions">
-        <button class="neo-btn small ${granted ? "ghost" : ""}" data-action="grant-tech" data-tech-id="${tech.id}">
-          ${granted ? "Revoke From Selected" : "Grant To Selected"}
-        </button>
-        <button class="neo-btn small ghost" data-action="delete-tech" data-tech-id="${tech.id}">
-          Delete Technique
-        </button>
-      </div>
+      </details>
     `;
         els.dmTechniqueDatabase.appendChild(card);
     });
 
-    els.dmTechniqueDatabase.querySelectorAll("button").forEach((btn) => {
-        btn.addEventListener("click", () => {
-            const action = btn.dataset.action;
-            const techId = Number(btn.dataset.techId);
+    els.dmTechniqueDatabase.querySelectorAll("[data-edit-tech]").forEach((input) => {
+        input.addEventListener("input", (e) => {
+            const id = e.target.dataset.editTech;
+            const field = e.target.dataset.field;
+            const tech = c.techniques.find((t) => t.id === id);
+            if (!tech) return;
+            tech[field] = ["level", "cost"].includes(field) ? Number(e.target.value) || 0 : e.target.value;
+            scheduleSave();
+            renderGrantedTechniques();
+        });
+    });
 
-            if (action === "grant-tech") toggleGrantTechnique(techId);
-            if (action === "delete-tech") deleteTechnique(techId);
+    els.dmTechniqueDatabase.querySelectorAll("[data-delete-tech]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+            c.techniques = c.techniques.filter((t) => t.id !== btn.dataset.deleteTech);
+            scheduleSave();
+            render();
         });
     });
 }
@@ -742,7 +843,7 @@ function renderDmSemblanceFields() {
 }
 
 function renderTabs() {
-    document.querySelectorAll(".tab-btn").forEach((btn) => {
+    document.querySelectorAll(".tab-btn[data-tab]").forEach((btn) => {
         btn.classList.toggle("active", btn.dataset.tab === state.activeTab);
     });
 
@@ -754,7 +855,6 @@ function renderTabs() {
 function render() {
     const c = getCharacter();
     ensureCurrentWithinMax(c);
-    saveState();
 
     renderCharacterTabs();
     renderHeader();
@@ -770,6 +870,9 @@ function render() {
     renderTabs();
 }
 
+/* =========================
+   ACTIONS
+========================= */
 function updateCharacterField(field, value) {
     const c = getCharacter();
 
@@ -796,14 +899,14 @@ function updateCharacterField(field, value) {
     if (field === "notesText") c.notesText = value;
 
     ensureCurrentWithinMax(c);
-    saveState();
+    scheduleSave();
     render();
 }
 
 function adjustStat(stat, amount) {
     const c = getCharacter();
     c.stats[stat] = (Number(c.stats[stat]) || 0) + amount;
-    saveState();
+    scheduleSave();
     render();
 }
 
@@ -812,11 +915,9 @@ function rollHp() {
     const conMod = modifierFromScore(c.stats.CON);
     const roll = rollD10();
     const total = Math.max(1, roll + conMod);
-
     c.hp.max += total;
     c.hp.current = c.hp.max;
-
-    saveState();
+    scheduleSave();
     render();
     alert(`HP Roll: d10 (${roll}) + CON mod (${conMod}) = +${total} HP`);
 }
@@ -826,11 +927,9 @@ function rollAura() {
     const conMod = modifierFromScore(c.stats.CON);
     const roll = rollD10();
     const total = Math.max(1, roll + conMod);
-
     c.aura.max += total;
     c.aura.current = c.aura.max;
-
-    saveState();
+    scheduleSave();
     render();
     alert(`Aura Roll: d10 (${roll}) + CON mod (${conMod}) = +${total} Aura`);
 }
@@ -838,26 +937,21 @@ function rollAura() {
 function restoreHp() {
     const c = getCharacter();
     c.hp.current = c.hp.max;
-    saveState();
+    scheduleSave();
     render();
 }
 
 function restoreAura() {
     const c = getCharacter();
     c.aura.current = c.aura.max;
-    saveState();
+    scheduleSave();
     render();
 }
 
 function useTechnique(techId) {
     const c = getCharacter();
-    const tech = state.techniqueDatabase.find((t) => t.id === techId);
+    const tech = c.techniques.find((t) => t.id === techId);
     if (!tech) return;
-
-    if (!c.grantedTechniqueIds.includes(techId)) {
-        alert("This technique is not granted to the selected character.");
-        return;
-    }
 
     if (c.aura.current < tech.cost) {
         alert("Not enough Aura Points.");
@@ -866,7 +960,7 @@ function useTechnique(techId) {
 
     c.aura.current -= tech.cost;
     ensureCurrentWithinMax(c);
-    saveState();
+    scheduleSave();
     render();
 }
 
@@ -888,61 +982,7 @@ function useSemblanceStage(stageKey) {
 
     c.aura.current -= cost;
     ensureCurrentWithinMax(c);
-    saveState();
-    render();
-}
-
-function createTechnique() {
-    const name = els.dmTechName.value.trim();
-    const level = Number(els.dmTechLevel.value);
-    const cost = Number(els.dmTechCost.value);
-    const type = els.dmTechType.value.trim();
-    const description = els.dmTechDescription.value.trim();
-
-    if (!name || !type || !description || !Number.isFinite(level) || !Number.isFinite(cost)) {
-        alert("Fill out the full Aura Technique form.");
-        return;
-    }
-
-    state.techniqueDatabase.push({
-        id: Date.now(),
-        name,
-        level,
-        cost,
-        type,
-        description
-    });
-
-    els.dmTechName.value = "";
-    els.dmTechLevel.value = "";
-    els.dmTechCost.value = "";
-    els.dmTechType.value = "";
-    els.dmTechDescription.value = "";
-
-    saveState();
-    render();
-}
-
-function toggleGrantTechnique(techId) {
-    const c = getCharacter();
-    const index = c.grantedTechniqueIds.indexOf(techId);
-
-    if (index === -1) {
-        c.grantedTechniqueIds.push(techId);
-    } else {
-        c.grantedTechniqueIds.splice(index, 1);
-    }
-
-    saveState();
-    render();
-}
-
-function deleteTechnique(techId) {
-    state.techniqueDatabase = state.techniqueDatabase.filter((t) => t.id !== techId);
-    state.characters.forEach((character) => {
-        character.grantedTechniqueIds = character.grantedTechniqueIds.filter((id) => id !== techId);
-    });
-    saveState();
+    scheduleSave();
     render();
 }
 
@@ -984,13 +1024,12 @@ function saveSemblanceFromDm() {
     c.semblance.unlocked.third = els.unlockThird.checked;
     c.semblance.unlocked.ascended = els.unlockAscended.checked;
 
-    saveState();
+    scheduleSave();
     render();
 }
 
 function saveCharacterState() {
     const c = getCharacter();
-
     if (els.stateActive.checked) c.state = "active";
     if (els.stateReserve.checked) c.state = "reserve";
     if (els.stateDead.checked) c.state = "dead";
@@ -1000,7 +1039,7 @@ function saveCharacterState() {
         c.aura.current = 0;
     }
 
-    saveState();
+    scheduleSave();
     render();
 }
 
@@ -1010,7 +1049,7 @@ function addCharacter() {
     state.characters.push(newCharacter);
     state.selectedCharacter = state.characters.length - 1;
     state.showReserve = true;
-    saveState();
+    scheduleSave();
     render();
 }
 
@@ -1026,12 +1065,11 @@ function deleteCharacter() {
     if (!confirmed) return;
 
     state.characters.splice(state.selectedCharacter, 1);
-
     if (state.selectedCharacter >= state.characters.length) {
         state.selectedCharacter = state.characters.length - 1;
     }
 
-    saveState();
+    scheduleSave();
     render();
 }
 
@@ -1047,7 +1085,7 @@ function addDustSpell() {
     }
 
     c.dustSpells.push({
-        id: Date.now(),
+        id: `dust-${Date.now()}`,
         name,
         type,
         description
@@ -1056,7 +1094,7 @@ function addDustSpell() {
     els.dustSpellName.value = "";
     els.dustSpellDescription.value = "";
 
-    saveState();
+    scheduleSave();
     render();
 }
 
@@ -1072,17 +1110,104 @@ function useDustSpell(spellId) {
     }
 
     c.dustInventory[spell.type] -= 1;
-    saveState();
+    scheduleSave();
     render();
 }
 
 function deleteDustSpell(spellId) {
     const c = getCharacter();
     c.dustSpells = c.dustSpells.filter((spell) => spell.id !== spellId);
-    saveState();
+    scheduleSave();
     render();
 }
 
+function createTechniqueForSelectedPlayer() {
+    const c = getCharacter();
+    const name = els.dmTechName.value.trim();
+    const level = Number(els.dmTechLevel.value);
+    const cost = Number(els.dmTechCost.value);
+    const type = els.dmTechType.value.trim();
+    const description = els.dmTechDescription.value.trim();
+
+    if (!name || !type || !description || !Number.isFinite(level) || !Number.isFinite(cost)) {
+        alert("Fill out the full Aura Technique form.");
+        return;
+    }
+
+    c.techniques.push({
+        id: `tech-${Date.now()}`,
+        name,
+        level,
+        cost,
+        type,
+        description
+    });
+
+    els.dmTechName.value = "";
+    els.dmTechLevel.value = "";
+    els.dmTechCost.value = "";
+    els.dmTechType.value = "";
+    els.dmTechDescription.value = "";
+
+    scheduleSave();
+    render();
+}
+
+/* =========================
+   DM OVERLAY
+========================= */
+function openDmOverlay() {
+    els.dmOverlay.classList.remove("hidden");
+    if (!dmUnlocked) {
+        els.dmLoginPanel.classList.remove("hidden");
+        els.dmFullscreenPanel.classList.add("hidden");
+        els.dmPasswordInput.value = "";
+        els.dmPasswordInput.focus();
+    } else {
+        els.dmLoginPanel.classList.add("hidden");
+        els.dmFullscreenPanel.classList.remove("hidden");
+    }
+}
+
+function closeDmOverlay() {
+    els.dmOverlay.classList.add("hidden");
+}
+
+function lockDm() {
+    dmUnlocked = false;
+    els.dmFullscreenPanel.classList.add("hidden");
+    els.dmLoginPanel.classList.remove("hidden");
+}
+
+async function unlockDm() {
+    try {
+        const res = await fetch(API_DM_LOGIN, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ password: els.dmPasswordInput.value })
+        });
+
+        if (!res.ok) {
+            alert("Wrong password.");
+            return;
+        }
+
+        dmUnlocked = true;
+        els.dmLoginPanel.classList.add("hidden");
+        els.dmFullscreenPanel.classList.remove("hidden");
+        renderDmSemblanceFields();
+        renderDmTechniqueDatabase();
+    } catch (err) {
+        console.error(err);
+        alert("Could not check DM password.");
+    }
+}
+
+/* =========================
+   BIND
+========================= */
 function bindInputs() {
     els.charName.addEventListener("input", (e) => updateCharacterField("name", e.target.value));
     els.charLevel.addEventListener("input", (e) => updateCharacterField("level", e.target.value));
@@ -1106,10 +1231,10 @@ function bindInputs() {
     els.inventoryText.addEventListener("input", (e) => updateCharacterField("inventoryText", e.target.value));
     els.notesText.addEventListener("input", (e) => updateCharacterField("notesText", e.target.value));
 
-    document.querySelectorAll(".tab-btn").forEach((btn) => {
+    document.querySelectorAll(".tab-btn[data-tab]").forEach((btn) => {
         btn.addEventListener("click", () => {
             state.activeTab = btn.dataset.tab;
-            saveState();
+            scheduleSave();
             renderTabs();
         });
     });
@@ -1117,11 +1242,9 @@ function bindInputs() {
     els.statsGrid.addEventListener("click", (e) => {
         const btn = e.target.closest("button");
         if (!btn) return;
-
         const stat = btn.dataset.stat;
         const action = btn.dataset.action;
         if (!stat || !action) return;
-
         if (action === "plus") adjustStat(stat, 1);
         if (action === "minus") adjustStat(stat, -1);
     });
@@ -1130,25 +1253,46 @@ function bindInputs() {
     els.rollAuraBtn.addEventListener("click", rollAura);
     els.restoreHpBtn.addEventListener("click", restoreHp);
     els.restoreAuraBtn.addEventListener("click", restoreAura);
-    els.createTechniqueBtn.addEventListener("click", createTechnique);
     els.saveSemblanceBtn.addEventListener("click", saveSemblanceFromDm);
     els.saveCharacterStateBtn.addEventListener("click", saveCharacterState);
     els.addCharacterBtn.addEventListener("click", addCharacter);
     els.deleteCharacterBtn.addEventListener("click", deleteCharacter);
     els.addDustSpellBtn.addEventListener("click", addDustSpell);
+    els.createTechniqueBtn.addEventListener("click", createTechniqueForSelectedPlayer);
 
     els.toggleReserveBtn.addEventListener("click", () => {
         state.showReserve = !state.showReserve;
-        saveState();
+        scheduleSave();
         render();
     });
 
     els.toggleDeadBtn.addEventListener("click", () => {
         state.showDead = !state.showDead;
-        saveState();
+        scheduleSave();
         render();
+    });
+
+    els.openDmOverlayBtn.addEventListener("click", openDmOverlay);
+    els.dmLoginBtn.addEventListener("click", unlockDm);
+    els.dmCloseBtn.addEventListener("click", closeDmOverlay);
+    els.dmCloseFullBtn.addEventListener("click", closeDmOverlay);
+    els.dmLogoutBtn.addEventListener("click", lockDm);
+    els.dmPasswordInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") unlockDm();
     });
 }
 
+/* =========================
+   INIT
+========================= */
 bindInputs();
-render();
+
+(async function init() {
+    try {
+        await loadRemoteState();
+        startPolling();
+    } catch (err) {
+        console.error(err);
+        alert("Could not load shared state from the server. Make sure Node is running.");
+    }
+})();
