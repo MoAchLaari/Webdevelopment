@@ -884,14 +884,18 @@ function rollHp() {
 
 function rollAura() {
     const c = getCharacter();
-    const conMod = modifierFromScore(c.stats.CON);
+    const auraMasteryBonus = c.skills["Aura Mastery"]?.bonus || 0;
     const roll = rollD10();
-    const total = Math.max(1, roll + conMod);
+    const total = Math.max(1, roll + auraMasteryBonus);
     c.aura.max += total;
     c.aura.current = c.aura.max;
     saveState();
     render();
-    alert(`Aura Roll: d10 (${roll}) + CON mod (${conMod}) = +${total} Aura`);
+
+    alert(
+        `Aura Roll:\n` +
+        `d10 (${roll}) + Aura Mastery (${auraMasteryBonus}) = +${total} Aura`
+    );
 }
 
 function restoreHp() {
