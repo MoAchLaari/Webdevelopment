@@ -241,7 +241,11 @@ const els = {
     dmCloseBtn: document.getElementById("dmCloseBtn"),
     dmCloseFullBtn: document.getElementById("dmCloseFullBtn"),
     dmLogoutBtn: document.getElementById("dmLogoutBtn"),
-    dmSelectedCharacterName: document.getElementById("dmSelectedCharacterName")
+    dmSelectedCharacterName: document.getElementById("dmSelectedCharacterName"),
+
+    exportDataBtn: document.getElementById("exportDataBtn"),
+    importDataBtn: document.getElementById("importDataBtn"),
+    importDataInput: document.getElementById("importDataInput"),
 };
 
 function loadState() {
@@ -1147,6 +1151,58 @@ function unlockDm() {
     renderDmTechniqueDatabase();
 }
 
+function exportSaveData() {
+    try {
+        const dataStr = JSON.stringify(state, null, 2);
+        const blob = new Blob([dataStr], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement("a");
+        const date = new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-");
+        a.href = url;
+        a.download = `rwby-dnd-save-${date}.json`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+
+        URL.revokeObjectURL(url);
+    } catch (err) {
+        console.error("Export failed:", err);
+        alert("Could not export save data.");
+    }
+}
+
+function importSaveDataFromFile(file) {
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = () => {
+        try {
+            const parsed = JSON.parse(reader.result);
+
+            if (!parsed || typeof parsed !== "object" || !Array.isArray(parsed.characters)) {
+                alert("That file is not a valid RWBY DnD save.");
+                return;
+            }
+
+            state = normalizeState(parsed);
+            saveState();
+            render();
+            alert("Save imported successfully.");
+        } catch (err) {
+            console.error("Import failed:", err);
+            alert("Could not import that file.");
+        }
+    };
+
+    reader.onerror = () => {
+        alert("Could not read that file.");
+    };
+
+    reader.readAsText(file);
+}
+
 function bindInputs() {
     els.charName.addEventListener("input", (e) => updateCharacterField("name", e.target.value));
     els.charLevel.addEventListener("input", (e) => updateCharacterField("level", e.target.value));
@@ -1218,6 +1274,18 @@ function bindInputs() {
     els.dmLogoutBtn.addEventListener("click", lockDm);
     els.dmPasswordInput.addEventListener("keydown", (e) => {
         if (e.key === "Enter") unlockDm();
+    });
+
+    els.exportDataBtn.addEventListener("click", exportSaveData);
+
+    els.importDataBtn.addEventListener("click", () => {
+        els.importDataInput.click();
+    });
+
+    els.importDataInput.addEventListener("change", (e) => {
+        const file = e.target.files?.[0];
+        importSaveDataFromFile(file);
+        e.target.value = "";
     });
 }
 
