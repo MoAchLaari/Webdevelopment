@@ -125,7 +125,9 @@
                                 <span>HIT POINTS</span>
                                 <strong id="hpDisplay">0 / 0</strong>
                             </div>
-                            <div class="bar-track"><div id="hpBar" class="bar-fill hp-fill"></div></div>
+                            <div class="bar-track">
+                                <div id="hpBar" class="bar-fill hp-fill"></div>
+                            </div>
                             <div class="resource-edit-grid">
                                 <div class="field">
                                     <label>Current HP</label>
@@ -143,7 +145,9 @@
                                 <span>AURA POINTS</span>
                                 <strong id="auraDisplay">0 / 0</strong>
                             </div>
-                            <div class="bar-track"><div id="auraBar" class="bar-fill aura-fill"></div></div>
+                            <div class="bar-track">
+                                <div id="auraBar" class="bar-fill aura-fill"></div>
+                            </div>
                             <div class="resource-edit-grid">
                                 <div class="field">
                                     <label>Current Aura</label>
@@ -218,6 +222,7 @@
                             <div class="section-title">DUST INVENTORY</div>
                             <div class="small-note">Using a Dust Spell consumes one of its selected dust type.</div>
                         </div>
+
                         <div id="dustInventoryGrid" class="dust-grid"></div>
 
                         <div class="section-title">CREATE DUST SPELL</div>
@@ -238,6 +243,7 @@
                         </div>
 
                         <button id="addDustSpellBtn" class="neo-btn">Add Dust Spell</button>
+
                         <div class="section-title dust-spell-gap">CREATED DUST SPELLS</div>
                         <div id="dustSpellList" class="technique-list"></div>
                     </div>
@@ -406,6 +412,6 @@
     </div>
 </div>
 
-<script type="module" src="script.js"></script>
+<script src="script.js"></script>
 </body>
 </html>

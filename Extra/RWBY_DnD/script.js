@@ -1,5 +1,5 @@
-const API_STATE = "/api/state";
-const API_DM_LOGIN = "/api/dm-login";
+const STORAGE_KEY = "rwby-dnd-local-v1";
+const DM_PASSWORD = "changeme123";
 
 const STAT_ORDER = ["STR", "DEX", "CON", "INT", "WIS", "CHA"];
 
@@ -69,7 +69,14 @@ function blankCharacter(index) {
         semblanceName: "",
         proficiencyBonus: 2,
         state: index < 4 ? "active" : "reserve",
-        stats: { STR: 10, DEX: 10, CON: 10, INT: 10, WIS: 10, CHA: 10 },
+        stats: {
+            STR: 10,
+            DEX: 10,
+            CON: 10,
+            INT: 10,
+            WIS: 10,
+            CHA: 10
+        },
         skills: makeBlankSkills(),
         hp: { current: 0, max: 0 },
         aura: { current: 0, max: 0 },
@@ -112,15 +119,9 @@ const defaultState = {
     ]
 };
 
-let state = structuredClone(defaultState);
+let state = loadState();
 let dmUnlocked = false;
-let saveTimer = null;
-let pollTimer = null;
-let lastStateString = "";
 
-/* =========================
-   ELEMENTS
-========================= */
 const els = {
     characterTabs: document.getElementById("characterTabs"),
     selectedNameSmall: document.getElementById("selectedNameSmall"),
@@ -243,60 +244,25 @@ const els = {
     dmSelectedCharacterName: document.getElementById("dmSelectedCharacterName")
 };
 
-/* =========================
-   SERVER STATE
-========================= */
-async function loadRemoteState() {
-    const res = await fetch(API_STATE, { cache: "no-store" });
-    if (!res.ok) throw new Error("Failed to load shared state.");
-    const data = await res.json();
-    state = normalizeState(data);
-    lastStateString = JSON.stringify(state);
-    render();
-}
-
-async function saveRemoteState() {
-    const stateString = JSON.stringify(state);
-    lastStateString = stateString;
-
-    const res = await fetch(API_STATE, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: stateString
-    });
-
-    if (!res.ok) {
-        console.error("Failed to save state.");
-    }
-}
-
-function scheduleSave() {
-    clearTimeout(saveTimer);
-    saveTimer = setTimeout(() => {
-        saveRemoteState();
-    }, 200);
-}
-
-async function pollRemoteState() {
+function loadState() {
     try {
-        const res = await fetch(API_STATE, { cache: "no-store" });
-        if (!res.ok) return;
-        const data = await res.json();
-        const incomingString = JSON.stringify(data);
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return structuredClone(defaultState);
 
-        if (incomingString !== lastStateString) {
-            state = normalizeState(data);
-            lastStateString = incomingString;
-            render();
-        }
+        const loaded = JSON.parse(raw);
+        return normalizeState(loaded);
     } catch (err) {
-        console.error("Polling failed:", err);
+        console.error("Failed to load local state:", err);
+        return structuredClone(defaultState);
     }
 }
 
-function startPolling() {
-    clearInterval(pollTimer);
-    pollTimer = setInterval(pollRemoteState, 2000);
+function saveState() {
+    try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch (err) {
+        console.error("Failed to save local state:", err);
+    }
 }
 
 function normalizeState(loaded) {
@@ -314,7 +280,6 @@ function normalizeState(loaded) {
         mergedChar.skills = { ...base.skills, ...(character.skills || {}) };
         mergedChar.dustSpells = Array.isArray(character.dustSpells) ? character.dustSpells : [];
         mergedChar.techniques = Array.isArray(character.techniques) ? character.techniques : [];
-
         mergedChar.semblance = {
             ...base.semblance,
             ...(character.semblance || {}),
@@ -336,9 +301,6 @@ function normalizeState(loaded) {
     return merged;
 }
 
-/* =========================
-   HELPERS
-========================= */
 function getCharacter() {
     return state.characters[state.selectedCharacter] || state.characters[0];
 }
@@ -389,9 +351,6 @@ function stageTitle(stageKey) {
     }[stageKey];
 }
 
-/* =========================
-   RENDER
-========================= */
 function renderCharacterTabs() {
     els.characterTabs.innerHTML = "";
     const visible = visibleCharacters();
@@ -411,7 +370,7 @@ function renderCharacterTabs() {
     `;
         tab.addEventListener("click", () => {
             state.selectedCharacter = actualIndex;
-            scheduleSave();
+            saveState();
             render();
         });
         els.characterTabs.appendChild(tab);
@@ -495,7 +454,7 @@ function renderStats() {
         input.addEventListener("input", (e) => {
             const stat = e.target.dataset.stat;
             c.stats[stat] = Number(e.target.value) || 0;
-            scheduleSave();
+            saveState();
             render();
         });
     });
@@ -543,7 +502,7 @@ function renderSkills() {
         input.addEventListener("input", (e) => {
             const skill = e.target.dataset.skill;
             c.skills[skill].bonus = Number(e.target.value) || 0;
-            scheduleSave();
+            saveState();
         });
     });
 }
@@ -666,7 +625,7 @@ function renderDustInventory() {
         input.addEventListener("input", (e) => {
             const type = e.target.dataset.dustType;
             c.dustInventory[type] = Math.max(0, Number(e.target.value) || 0);
-            scheduleSave();
+            saveState();
         });
     });
 
@@ -784,7 +743,7 @@ function renderDmTechniqueDatabase() {
             const tech = c.techniques.find((t) => t.id === id);
             if (!tech) return;
             tech[field] = ["level", "cost"].includes(field) ? Number(e.target.value) || 0 : e.target.value;
-            scheduleSave();
+            saveState();
             renderGrantedTechniques();
         });
     });
@@ -792,7 +751,7 @@ function renderDmTechniqueDatabase() {
     els.dmTechniqueDatabase.querySelectorAll("[data-delete-tech]").forEach((btn) => {
         btn.addEventListener("click", () => {
             c.techniques = c.techniques.filter((t) => t.id !== btn.dataset.deleteTech);
-            scheduleSave();
+            saveState();
             render();
         });
     });
@@ -870,9 +829,6 @@ function render() {
     renderTabs();
 }
 
-/* =========================
-   ACTIONS
-========================= */
 function updateCharacterField(field, value) {
     const c = getCharacter();
 
@@ -899,14 +855,14 @@ function updateCharacterField(field, value) {
     if (field === "notesText") c.notesText = value;
 
     ensureCurrentWithinMax(c);
-    scheduleSave();
+    saveState();
     render();
 }
 
 function adjustStat(stat, amount) {
     const c = getCharacter();
     c.stats[stat] = (Number(c.stats[stat]) || 0) + amount;
-    scheduleSave();
+    saveState();
     render();
 }
 
@@ -917,7 +873,7 @@ function rollHp() {
     const total = Math.max(1, roll + conMod);
     c.hp.max += total;
     c.hp.current = c.hp.max;
-    scheduleSave();
+    saveState();
     render();
     alert(`HP Roll: d10 (${roll}) + CON mod (${conMod}) = +${total} HP`);
 }
@@ -929,7 +885,7 @@ function rollAura() {
     const total = Math.max(1, roll + conMod);
     c.aura.max += total;
     c.aura.current = c.aura.max;
-    scheduleSave();
+    saveState();
     render();
     alert(`Aura Roll: d10 (${roll}) + CON mod (${conMod}) = +${total} Aura`);
 }
@@ -937,14 +893,14 @@ function rollAura() {
 function restoreHp() {
     const c = getCharacter();
     c.hp.current = c.hp.max;
-    scheduleSave();
+    saveState();
     render();
 }
 
 function restoreAura() {
     const c = getCharacter();
     c.aura.current = c.aura.max;
-    scheduleSave();
+    saveState();
     render();
 }
 
@@ -960,7 +916,7 @@ function useTechnique(techId) {
 
     c.aura.current -= tech.cost;
     ensureCurrentWithinMax(c);
-    scheduleSave();
+    saveState();
     render();
 }
 
@@ -982,7 +938,7 @@ function useSemblanceStage(stageKey) {
 
     c.aura.current -= cost;
     ensureCurrentWithinMax(c);
-    scheduleSave();
+    saveState();
     render();
 }
 
@@ -1024,12 +980,13 @@ function saveSemblanceFromDm() {
     c.semblance.unlocked.third = els.unlockThird.checked;
     c.semblance.unlocked.ascended = els.unlockAscended.checked;
 
-    scheduleSave();
+    saveState();
     render();
 }
 
 function saveCharacterState() {
     const c = getCharacter();
+
     if (els.stateActive.checked) c.state = "active";
     if (els.stateReserve.checked) c.state = "reserve";
     if (els.stateDead.checked) c.state = "dead";
@@ -1039,7 +996,7 @@ function saveCharacterState() {
         c.aura.current = 0;
     }
 
-    scheduleSave();
+    saveState();
     render();
 }
 
@@ -1049,7 +1006,7 @@ function addCharacter() {
     state.characters.push(newCharacter);
     state.selectedCharacter = state.characters.length - 1;
     state.showReserve = true;
-    scheduleSave();
+    saveState();
     render();
 }
 
@@ -1065,11 +1022,12 @@ function deleteCharacter() {
     if (!confirmed) return;
 
     state.characters.splice(state.selectedCharacter, 1);
+
     if (state.selectedCharacter >= state.characters.length) {
         state.selectedCharacter = state.characters.length - 1;
     }
 
-    scheduleSave();
+    saveState();
     render();
 }
 
@@ -1094,7 +1052,7 @@ function addDustSpell() {
     els.dustSpellName.value = "";
     els.dustSpellDescription.value = "";
 
-    scheduleSave();
+    saveState();
     render();
 }
 
@@ -1110,14 +1068,14 @@ function useDustSpell(spellId) {
     }
 
     c.dustInventory[spell.type] -= 1;
-    scheduleSave();
+    saveState();
     render();
 }
 
 function deleteDustSpell(spellId) {
     const c = getCharacter();
     c.dustSpells = c.dustSpells.filter((spell) => spell.id !== spellId);
-    scheduleSave();
+    saveState();
     render();
 }
 
@@ -1149,13 +1107,10 @@ function createTechniqueForSelectedPlayer() {
     els.dmTechType.value = "";
     els.dmTechDescription.value = "";
 
-    scheduleSave();
+    saveState();
     render();
 }
 
-/* =========================
-   DM OVERLAY
-========================= */
 function openDmOverlay() {
     els.dmOverlay.classList.remove("hidden");
     if (!dmUnlocked) {
@@ -1179,35 +1134,19 @@ function lockDm() {
     els.dmLoginPanel.classList.remove("hidden");
 }
 
-async function unlockDm() {
-    try {
-        const res = await fetch(API_DM_LOGIN, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ password: els.dmPasswordInput.value })
-        });
-
-        if (!res.ok) {
-            alert("Wrong password.");
-            return;
-        }
-
-        dmUnlocked = true;
-        els.dmLoginPanel.classList.add("hidden");
-        els.dmFullscreenPanel.classList.remove("hidden");
-        renderDmSemblanceFields();
-        renderDmTechniqueDatabase();
-    } catch (err) {
-        console.error(err);
-        alert("Could not check DM password.");
+function unlockDm() {
+    if (els.dmPasswordInput.value !== DM_PASSWORD) {
+        alert("Wrong password.");
+        return;
     }
+
+    dmUnlocked = true;
+    els.dmLoginPanel.classList.add("hidden");
+    els.dmFullscreenPanel.classList.remove("hidden");
+    renderDmSemblanceFields();
+    renderDmTechniqueDatabase();
 }
 
-/* =========================
-   BIND
-========================= */
 function bindInputs() {
     els.charName.addEventListener("input", (e) => updateCharacterField("name", e.target.value));
     els.charLevel.addEventListener("input", (e) => updateCharacterField("level", e.target.value));
@@ -1234,7 +1173,7 @@ function bindInputs() {
     document.querySelectorAll(".tab-btn[data-tab]").forEach((btn) => {
         btn.addEventListener("click", () => {
             state.activeTab = btn.dataset.tab;
-            scheduleSave();
+            saveState();
             renderTabs();
         });
     });
@@ -1262,13 +1201,13 @@ function bindInputs() {
 
     els.toggleReserveBtn.addEventListener("click", () => {
         state.showReserve = !state.showReserve;
-        scheduleSave();
+        saveState();
         render();
     });
 
     els.toggleDeadBtn.addEventListener("click", () => {
         state.showDead = !state.showDead;
-        scheduleSave();
+        saveState();
         render();
     });
 
@@ -1282,17 +1221,5 @@ function bindInputs() {
     });
 }
 
-/* =========================
-   INIT
-========================= */
 bindInputs();
-
-(async function init() {
-    try {
-        await loadRemoteState();
-        startPolling();
-    } catch (err) {
-        console.error(err);
-        alert("Could not load shared state from the server. Make sure Node is running.");
-    }
-})();
+render();
