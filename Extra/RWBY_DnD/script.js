@@ -1157,15 +1157,19 @@ function exportSaveData() {
         const blob = new Blob([dataStr], { type: "application/json" });
         const url = URL.createObjectURL(blob);
 
-        const a = document.createElement("a");
+        const link = document.createElement("a");
         const date = new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-");
-        a.href = url;
-        a.download = `rwby-dnd-save-${date}.json`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
+        link.href = url;
+        link.download = `rwby-dnd-save-${date}.json`;
+        link.style.display = "none";
 
-        URL.revokeObjectURL(url);
+        document.body.appendChild(link);
+        link.click();
+
+        setTimeout(() => {
+            URL.revokeObjectURL(url);
+            link.remove();
+        }, 100);
     } catch (err) {
         console.error("Export failed:", err);
         alert("Could not export save data.");
@@ -1276,18 +1280,28 @@ function bindInputs() {
         if (e.key === "Enter") unlockDm();
     });
 
-    els.exportDataBtn.addEventListener("click", exportSaveData);
+    if (els.exportDataBtn) {
+        els.exportDataBtn.addEventListener("click", exportSaveData);
+    } else {
+        console.error("exportDataBtn not found in HTML");
+    }
 
-    els.importDataBtn.addEventListener("click", () => {
-        els.importDataInput.click();
-    });
+    if (els.importDataBtn && els.importDataInput) {
+        els.importDataBtn.addEventListener("click", () => {
+            els.importDataInput.click();
+        });
 
-    els.importDataInput.addEventListener("change", (e) => {
-        const file = e.target.files?.[0];
-        importSaveDataFromFile(file);
-        e.target.value = "";
-    });
+        els.importDataInput.addEventListener("change", (e) => {
+            const file = e.target.files?.[0];
+            importSaveDataFromFile(file);
+            e.target.value = "";
+        });
+    } else {
+        console.error("importDataBtn or importDataInput not found in HTML");
+    }
 }
 
 bindInputs();
+console.log("script loaded");
+console.log("export button:", els.exportDataBtn);
 render();
