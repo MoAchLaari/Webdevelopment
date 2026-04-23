@@ -1,5 +1,5 @@
 const STORAGE_KEY = "rwby-dnd-local-v1";
-const DM_PASSWORD = "changeme123";
+const DM_PASSWORD = "123456789";
 
 const STAT_ORDER = ["STR", "DEX", "CON", "INT", "WIS", "CHA"];
 
