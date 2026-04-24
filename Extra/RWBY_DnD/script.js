@@ -1,4 +1,4 @@
-const STORAGE_KEY = "rwby-dnd-local-v1";
+const STORAGE_KEY = "rwby-dnd-local-v2";
 const DM_PASSWORD = "123456789";
 
 const STAT_ORDER = ["STR", "DEX", "CON", "INT", "WIS", "CHA"];
@@ -59,7 +59,7 @@ function blankCharacter(index) {
     });
 
     return {
-        id: `char-${Date.now()}-${index}`,
+        id: `char-${Date.now()}-${index}-${Math.random().toString(16).slice(2)}`,
         name: "",
         race: "",
         className: "",
@@ -69,14 +69,7 @@ function blankCharacter(index) {
         semblanceName: "",
         proficiencyBonus: 2,
         state: index < 4 ? "active" : "reserve",
-        stats: {
-            STR: 10,
-            DEX: 10,
-            CON: 10,
-            INT: 10,
-            WIS: 10,
-            CHA: 10
-        },
+        stats: { STR: 10, DEX: 10, CON: 10, INT: 10, WIS: 10, CHA: 10 },
         skills: makeBlankSkills(),
         hp: { current: 0, max: 0 },
         aura: { current: 0, max: 0 },
@@ -106,11 +99,21 @@ function blankCharacter(index) {
     };
 }
 
+const defaultTheme = {
+    bg: "#050505",
+    panel: "#121212",
+    accent: "#ff3b3b",
+    accentTwo: "#b30000",
+    aura: "#9fe8ff",
+    text: "#ffffff"
+};
+
 const defaultState = {
     selectedCharacter: 0,
     activeTab: "skills",
     showReserve: false,
     showDead: false,
+    theme: structuredClone(defaultTheme),
     characters: [
         blankCharacter(0),
         blankCharacter(1),
@@ -246,44 +249,47 @@ const els = {
     exportDataBtn: document.getElementById("exportDataBtn"),
     importDataBtn: document.getElementById("importDataBtn"),
     importDataInput: document.getElementById("importDataInput"),
+
+    themeBgColor: document.getElementById("themeBgColor"),
+    themePanelColor: document.getElementById("themePanelColor"),
+    themeAccentColor: document.getElementById("themeAccentColor"),
+    themeAccentTwoColor: document.getElementById("themeAccentTwoColor"),
+    themeAuraColor: document.getElementById("themeAuraColor"),
+    themeTextColor: document.getElementById("themeTextColor"),
+    saveThemeBtn: document.getElementById("saveThemeBtn"),
+    resetThemeBtn: document.getElementById("resetThemeBtn")
 };
 
 function loadState() {
     try {
         const raw = localStorage.getItem(STORAGE_KEY);
         if (!raw) return structuredClone(defaultState);
-
-        const loaded = JSON.parse(raw);
-        return normalizeState(loaded);
-    } catch (err) {
-        console.error("Failed to load local state:", err);
+        return normalizeState(JSON.parse(raw));
+    } catch {
         return structuredClone(defaultState);
     }
 }
 
 function saveState() {
-    try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    } catch (err) {
-        console.error("Failed to save local state:", err);
-    }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
 
 function normalizeState(loaded) {
     const merged = structuredClone(defaultState);
     Object.assign(merged, loaded || {});
+    merged.theme = { ...defaultTheme, ...(loaded?.theme || {}) };
 
     merged.characters = (loaded?.characters?.length ? loaded.characters : defaultState.characters).map((character, index) => {
         const base = blankCharacter(index);
         const mergedChar = { ...base, ...character };
-
         mergedChar.stats = { ...base.stats, ...(character.stats || {}) };
+        mergedChar.skills = { ...base.skills, ...(character.skills || {}) };
         mergedChar.hp = { ...base.hp, ...(character.hp || {}) };
         mergedChar.aura = { ...base.aura, ...(character.aura || {}) };
         mergedChar.dustInventory = { ...base.dustInventory, ...(character.dustInventory || {}) };
-        mergedChar.skills = { ...base.skills, ...(character.skills || {}) };
         mergedChar.dustSpells = Array.isArray(character.dustSpells) ? character.dustSpells : [];
         mergedChar.techniques = Array.isArray(character.techniques) ? character.techniques : [];
+
         mergedChar.semblance = {
             ...base.semblance,
             ...(character.semblance || {}),
@@ -330,6 +336,66 @@ function ensureCurrentWithinMax(character) {
     character.aura.max = Math.max(0, Number(character.aura.max) || 0);
     character.hp.current = clamp(Number(character.hp.current) || 0, 0, character.hp.max);
     character.aura.current = clamp(Number(character.aura.current) || 0, 0, character.aura.max);
+}
+
+function hexToRgba(hex, alpha = 1) {
+    const clean = hex.replace("#", "");
+    const r = parseInt(clean.slice(0, 2), 16);
+    const g = parseInt(clean.slice(2, 4), 16);
+    const b = parseInt(clean.slice(4, 6), 16);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+function applyTheme() {
+    const theme = state.theme || defaultTheme;
+    const root = document.documentElement;
+
+    root.style.setProperty("--bg", theme.bg);
+    root.style.setProperty("--bg2", theme.bg);
+    root.style.setProperty("--panel", hexToRgba(theme.panel, 0.94));
+    root.style.setProperty("--panel-2", hexToRgba(theme.panel, 0.96));
+    root.style.setProperty("--text", theme.text);
+    root.style.setProperty("--primary", theme.text);
+    root.style.setProperty("--accent", theme.accent);
+    root.style.setProperty("--accent-2", theme.accentTwo);
+    root.style.setProperty("--line-strong", hexToRgba(theme.accent, 0.45));
+    root.style.setProperty("--aura", theme.aura);
+
+    document.body.style.background = `
+    radial-gradient(circle at 15% 10%, ${hexToRgba(theme.accent, 0.14)}, transparent 22%),
+    radial-gradient(circle at 85% 85%, ${hexToRgba(theme.text, 0.05)}, transparent 18%),
+    linear-gradient(180deg, ${theme.bg} 0%, ${theme.bg} 45%, ${theme.accentTwo} 100%)
+  `;
+}
+
+function renderThemeFields() {
+    if (!els.themeBgColor) return;
+    const theme = state.theme || defaultTheme;
+    els.themeBgColor.value = theme.bg;
+    els.themePanelColor.value = theme.panel;
+    els.themeAccentColor.value = theme.accent;
+    els.themeAccentTwoColor.value = theme.accentTwo;
+    els.themeAuraColor.value = theme.aura;
+    els.themeTextColor.value = theme.text;
+}
+
+function saveThemeFromDm() {
+    state.theme = {
+        bg: els.themeBgColor.value,
+        panel: els.themePanelColor.value,
+        accent: els.themeAccentColor.value,
+        accentTwo: els.themeAccentTwoColor.value,
+        aura: els.themeAuraColor.value,
+        text: els.themeTextColor.value
+    };
+    saveState();
+    render();
+}
+
+function resetTheme() {
+    state.theme = structuredClone(defaultTheme);
+    saveState();
+    render();
 }
 
 function visibleCharacters() {
@@ -383,8 +449,9 @@ function renderCharacterTabs() {
 
 function renderHeader() {
     const c = getCharacter();
-    els.selectedNameSmall.textContent = c.name || `Character ${state.selectedCharacter + 1}`;
-    els.topCharacterName.textContent = c.name || `Character ${state.selectedCharacter + 1}`;
+    const name = c.name || `Character ${state.selectedCharacter + 1}`;
+    els.selectedNameSmall.textContent = name;
+    els.topCharacterName.textContent = name;
     els.topHpMini.textContent = `${c.hp.current} / ${c.hp.max}`;
     els.topAuraMini.textContent = `${c.aura.current} / ${c.aura.max}`;
     els.topArmorMini.textContent = c.armor;
@@ -393,7 +460,7 @@ function renderHeader() {
     els.selectedState.textContent = c.state.charAt(0).toUpperCase() + c.state.slice(1);
     els.toggleReserveBtn.textContent = state.showReserve ? "Hide Reserve" : "Show Reserve";
     els.toggleDeadBtn.textContent = state.showDead ? "Hide Dead" : "Show Dead";
-    els.dmSelectedCharacterName.textContent = c.name || `Character ${state.selectedCharacter + 1}`;
+    els.dmSelectedCharacterName.textContent = name;
 }
 
 function renderMainFields() {
@@ -425,10 +492,8 @@ function renderMainFields() {
     els.hpDisplay.textContent = `${c.hp.current} / ${c.hp.max}`;
     els.auraDisplay.textContent = `${c.aura.current} / ${c.aura.max}`;
 
-    const hpWidth = c.hp.max > 0 ? (c.hp.current / c.hp.max) * 100 : 0;
-    const auraWidth = c.aura.max > 0 ? (c.aura.current / c.aura.max) * 100 : 0;
-    els.hpBar.style.width = `${clamp(hpWidth, 0, 100)}%`;
-    els.auraBar.style.width = `${clamp(auraWidth, 0, 100)}%`;
+    els.hpBar.style.width = `${c.hp.max > 0 ? clamp((c.hp.current / c.hp.max) * 100, 0, 100) : 0}%`;
+    els.auraBar.style.width = `${c.aura.max > 0 ? clamp((c.aura.current / c.aura.max) * 100, 0, 100) : 0}%`;
 }
 
 function renderStats() {
@@ -438,7 +503,6 @@ function renderStats() {
     STAT_ORDER.forEach((stat) => {
         const score = c.stats[stat];
         const mod = modifierFromScore(score);
-
         const card = document.createElement("div");
         card.className = "stat-card";
         card.innerHTML = `
@@ -447,8 +511,8 @@ function renderStats() {
       <div class="stat-score">${score}</div>
       <div class="stat-mod">Modifier ${formatModifier(mod)}</div>
       <div class="stat-controls">
-        <button data-stat="${stat}" data-action="minus">-</button>
-        <button data-stat="${stat}" data-action="plus">+</button>
+        <button type="button" data-stat="${stat}" data-action="minus">-</button>
+        <button type="button" data-stat="${stat}" data-action="plus">+</button>
       </div>
     `;
         els.statsGrid.appendChild(card);
@@ -456,8 +520,7 @@ function renderStats() {
 
     els.statsGrid.querySelectorAll(".stat-score-input").forEach((input) => {
         input.addEventListener("input", (e) => {
-            const stat = e.target.dataset.stat;
-            c.stats[stat] = Number(e.target.value) || 0;
+            c.stats[e.target.dataset.stat] = Number(e.target.value) || 0;
             saveState();
             render();
         });
@@ -532,21 +595,12 @@ function renderSemblanceStages() {
         </summary>
         <div class="collapse-body">
           <div class="stage-lines">
-            <div class="stage-line">
-              <strong>${stage.active || "Active"}</strong>
-              <div>${stage.activeDescription || "No active description yet."}</div>
-            </div>
-            <div class="stage-line">
-              <strong>${stage.passiveName || "Passive"} [Passive]</strong>
-              <div>${stage.passiveDescription || "No passive description yet."}</div>
-            </div>
-            <div class="stage-line">
-              <strong>Aura Cost</strong>
-              <div>${stage.auraCost || 0}</div>
-            </div>
+            <div class="stage-line"><strong>${stage.active || "Active"}</strong><div>${stage.activeDescription || "No active description yet."}</div></div>
+            <div class="stage-line"><strong>${stage.passiveName || "Passive"} [Passive]</strong><div>${stage.passiveDescription || "No passive description yet."}</div></div>
+            <div class="stage-line"><strong>Aura Cost</strong><div>${stage.auraCost || 0}</div></div>
           </div>
           <div class="technique-actions">
-            <button class="neo-btn small use-semblance-btn" data-stage="${key}" ${locked ? "disabled" : ""}>Use Active</button>
+            <button type="button" class="neo-btn small use-semblance-btn" data-stage="${key}" ${locked ? "disabled" : ""}>Use Active</button>
           </div>
         </div>
       </details>
@@ -555,9 +609,7 @@ function renderSemblanceStages() {
     });
 
     els.semblanceStages.querySelectorAll(".use-semblance-btn").forEach((btn) => {
-        btn.addEventListener("click", () => {
-            useSemblanceStage(btn.dataset.stage);
-        });
+        btn.addEventListener("click", () => useSemblanceStage(btn.dataset.stage));
     });
 }
 
@@ -566,12 +618,7 @@ function renderGrantedTechniques() {
     els.grantedTechniques.innerHTML = "";
 
     if (!c.techniques.length) {
-        els.grantedTechniques.innerHTML = `
-      <div class="technique-card">
-        <strong>No Aura Techniques.</strong>
-        <div class="small-note">The DM needs to add them for this player.</div>
-      </div>
-    `;
+        els.grantedTechniques.innerHTML = `<div class="technique-card"><strong>No Aura Techniques.</strong><div class="small-note">The DM needs to add them for this player.</div></div>`;
         return;
     }
 
@@ -593,7 +640,7 @@ function renderGrantedTechniques() {
         <div class="collapse-body">
           <div class="small-note">${tech.description}</div>
           <div class="technique-actions">
-            <button class="neo-btn small use-tech-btn" data-tech-id="${tech.id}">Use Technique</button>
+            <button type="button" class="neo-btn small use-tech-btn" data-tech-id="${tech.id}">Use Technique</button>
           </div>
         </div>
       </details>
@@ -602,9 +649,7 @@ function renderGrantedTechniques() {
     });
 
     els.grantedTechniques.querySelectorAll(".use-tech-btn").forEach((btn) => {
-        btn.addEventListener("click", () => {
-            useTechnique(btn.dataset.techId);
-        });
+        btn.addEventListener("click", () => useTechnique(btn.dataset.techId));
     });
 }
 
@@ -613,22 +658,15 @@ function renderDustInventory() {
     els.dustInventoryGrid.innerHTML = "";
 
     DUST_TYPES.forEach((type) => {
-        const dustClass = DUST_CLASS_MAP[type];
-        const amount = c.dustInventory[type] || 0;
-
         const card = document.createElement("div");
-        card.className = `dust-card ${dustClass}`;
-        card.innerHTML = `
-      <label>${type}</label>
-      <input type="number" min="0" data-dust-type="${type}" value="${amount}" />
-    `;
+        card.className = `dust-card ${DUST_CLASS_MAP[type]}`;
+        card.innerHTML = `<label>${type}</label><input type="number" min="0" data-dust-type="${type}" value="${c.dustInventory[type] || 0}" />`;
         els.dustInventoryGrid.appendChild(card);
     });
 
     els.dustInventoryGrid.querySelectorAll("input[data-dust-type]").forEach((input) => {
         input.addEventListener("input", (e) => {
-            const type = e.target.dataset.dustType;
-            c.dustInventory[type] = Math.max(0, Number(e.target.value) || 0);
+            c.dustInventory[e.target.dataset.dustType] = Math.max(0, Number(e.target.value) || 0);
             saveState();
         });
     });
@@ -653,17 +691,14 @@ function renderDustSpells() {
         <summary class="collapse-summary">
           <div class="technique-top">
             <div><strong>${spell.name}</strong></div>
-            <div class="technique-meta">
-              <div class="meta-pill">${spell.type}</div>
-              <div class="meta-pill">Consumes 1</div>
-            </div>
+            <div class="technique-meta"><div class="meta-pill">${spell.type}</div><div class="meta-pill">Consumes 1</div></div>
           </div>
         </summary>
         <div class="collapse-body">
           <div class="small-note">${spell.description}</div>
           <div class="dust-card-actions">
-            <button class="neo-btn small use-dust-spell-btn" data-spell-id="${spell.id}">Use Spell</button>
-            <button class="neo-btn small ghost delete-dust-spell-btn" data-spell-id="${spell.id}">Delete</button>
+            <button type="button" class="neo-btn small use-dust-spell-btn" data-spell-id="${spell.id}">Use Spell</button>
+            <button type="button" class="neo-btn small ghost delete-dust-spell-btn" data-spell-id="${spell.id}">Delete</button>
           </div>
         </div>
       </details>
@@ -671,17 +706,8 @@ function renderDustSpells() {
         els.dustSpellList.appendChild(card);
     });
 
-    els.dustSpellList.querySelectorAll(".use-dust-spell-btn").forEach((btn) => {
-        btn.addEventListener("click", () => {
-            useDustSpell(btn.dataset.spellId);
-        });
-    });
-
-    els.dustSpellList.querySelectorAll(".delete-dust-spell-btn").forEach((btn) => {
-        btn.addEventListener("click", () => {
-            deleteDustSpell(btn.dataset.spellId);
-        });
-    });
+    els.dustSpellList.querySelectorAll(".use-dust-spell-btn").forEach((btn) => btn.addEventListener("click", () => useDustSpell(btn.dataset.spellId)));
+    els.dustSpellList.querySelectorAll(".delete-dust-spell-btn").forEach((btn) => btn.addEventListener("click", () => deleteDustSpell(btn.dataset.spellId)));
 }
 
 function renderDmTechniqueDatabase() {
@@ -710,30 +736,13 @@ function renderDmTechniqueDatabase() {
         </summary>
         <div class="collapse-body">
           <div class="form-grid">
-            <div class="field">
-              <label>Name</label>
-              <input type="text" data-edit-tech="${tech.id}" data-field="name" value="${tech.name}" />
-            </div>
-            <div class="field">
-              <label>Level</label>
-              <input type="number" data-edit-tech="${tech.id}" data-field="level" value="${tech.level}" />
-            </div>
-            <div class="field">
-              <label>Cost</label>
-              <input type="number" data-edit-tech="${tech.id}" data-field="cost" value="${tech.cost}" />
-            </div>
-            <div class="field">
-              <label>Type</label>
-              <input type="text" data-edit-tech="${tech.id}" data-field="type" value="${tech.type}" />
-            </div>
+            <div class="field"><label>Name</label><input type="text" data-edit-tech="${tech.id}" data-field="name" value="${tech.name}" /></div>
+            <div class="field"><label>Level</label><input type="number" data-edit-tech="${tech.id}" data-field="level" value="${tech.level}" /></div>
+            <div class="field"><label>Cost</label><input type="number" data-edit-tech="${tech.id}" data-field="cost" value="${tech.cost}" /></div>
+            <div class="field"><label>Type</label><input type="text" data-edit-tech="${tech.id}" data-field="type" value="${tech.type}" /></div>
           </div>
-          <div class="field">
-            <label>Description</label>
-            <textarea class="small-textarea" data-edit-tech="${tech.id}" data-field="description">${tech.description}</textarea>
-          </div>
-          <div class="dm-tech-actions">
-            <button class="neo-btn small ghost" data-delete-tech="${tech.id}">Delete</button>
-          </div>
+          <div class="field"><label>Description</label><textarea class="small-textarea" data-edit-tech="${tech.id}" data-field="description">${tech.description}</textarea></div>
+          <div class="dm-tech-actions"><button type="button" class="neo-btn small ghost" data-delete-tech="${tech.id}">Delete</button></div>
         </div>
       </details>
     `;
@@ -742,10 +751,9 @@ function renderDmTechniqueDatabase() {
 
     els.dmTechniqueDatabase.querySelectorAll("[data-edit-tech]").forEach((input) => {
         input.addEventListener("input", (e) => {
-            const id = e.target.dataset.editTech;
-            const field = e.target.dataset.field;
-            const tech = c.techniques.find((t) => t.id === id);
+            const tech = c.techniques.find((t) => t.id === e.target.dataset.editTech);
             if (!tech) return;
+            const field = e.target.dataset.field;
             tech[field] = ["level", "cost"].includes(field) ? Number(e.target.value) || 0 : e.target.value;
             saveState();
             renderGrantedTechniques();
@@ -816,6 +824,8 @@ function renderTabs() {
 }
 
 function render() {
+    applyTheme();
+
     const c = getCharacter();
     ensureCurrentWithinMax(c);
 
@@ -830,6 +840,7 @@ function render() {
     renderDustSpells();
     renderDmTechniqueDatabase();
     renderDmSemblanceFields();
+    renderThemeFields();
     renderTabs();
 }
 
@@ -891,11 +902,7 @@ function rollAura() {
     c.aura.current = c.aura.max;
     saveState();
     render();
-
-    alert(
-        `Aura Roll:\n` +
-        `d10 (${roll}) + Aura Mastery (${auraMasteryBonus}) = +${total} Aura`
-    );
+    alert(`Aura Roll: d10 (${roll}) + Aura Mastery (${auraMasteryBonus}) = +${total} Aura`);
 }
 
 function restoreHp() {
@@ -930,8 +937,7 @@ function useTechnique(techId) {
 
 function useSemblanceStage(stageKey) {
     const c = getCharacter();
-    const locked = stageLocked(stageKey, c);
-    if (locked) {
+    if (stageLocked(stageKey, c)) {
         alert("That Semblance stage is still locked.");
         return;
     }
@@ -953,35 +959,21 @@ function useSemblanceStage(stageKey) {
 function saveSemblanceFromDm() {
     const c = getCharacter();
 
-    c.semblance.base.active = els.dmBaseActive.value;
-    c.semblance.base.activeDescription = els.dmBaseActiveDesc.value;
-    c.semblance.base.passiveName = els.dmBasePassiveName.value;
-    c.semblance.base.passiveDescription = els.dmBasePassiveDesc.value;
-    c.semblance.base.auraCost = Math.max(0, Number(els.dmBaseCost.value) || 0);
+    const map = [
+        ["base", els.dmBaseActive, els.dmBaseActiveDesc, els.dmBasePassiveName, els.dmBasePassiveDesc, els.dmBaseCost],
+        ["first", els.dmFirstActive, els.dmFirstActiveDesc, els.dmFirstPassiveName, els.dmFirstPassiveDesc, els.dmFirstCost],
+        ["second", els.dmSecondActive, els.dmSecondActiveDesc, els.dmSecondPassiveName, els.dmSecondPassiveDesc, els.dmSecondCost],
+        ["third", els.dmThirdActive, els.dmThirdActiveDesc, els.dmThirdPassiveName, els.dmThirdPassiveDesc, els.dmThirdCost],
+        ["ascended", els.dmAscendedActive, els.dmAscendedActiveDesc, els.dmAscendedPassiveName, els.dmAscendedPassiveDesc, els.dmAscendedCost]
+    ];
 
-    c.semblance.first.active = els.dmFirstActive.value;
-    c.semblance.first.activeDescription = els.dmFirstActiveDesc.value;
-    c.semblance.first.passiveName = els.dmFirstPassiveName.value;
-    c.semblance.first.passiveDescription = els.dmFirstPassiveDesc.value;
-    c.semblance.first.auraCost = Math.max(0, Number(els.dmFirstCost.value) || 0);
-
-    c.semblance.second.active = els.dmSecondActive.value;
-    c.semblance.second.activeDescription = els.dmSecondActiveDesc.value;
-    c.semblance.second.passiveName = els.dmSecondPassiveName.value;
-    c.semblance.second.passiveDescription = els.dmSecondPassiveDesc.value;
-    c.semblance.second.auraCost = Math.max(0, Number(els.dmSecondCost.value) || 0);
-
-    c.semblance.third.active = els.dmThirdActive.value;
-    c.semblance.third.activeDescription = els.dmThirdActiveDesc.value;
-    c.semblance.third.passiveName = els.dmThirdPassiveName.value;
-    c.semblance.third.passiveDescription = els.dmThirdPassiveDesc.value;
-    c.semblance.third.auraCost = Math.max(0, Number(els.dmThirdCost.value) || 0);
-
-    c.semblance.ascended.active = els.dmAscendedActive.value;
-    c.semblance.ascended.activeDescription = els.dmAscendedActiveDesc.value;
-    c.semblance.ascended.passiveName = els.dmAscendedPassiveName.value;
-    c.semblance.ascended.passiveDescription = els.dmAscendedPassiveDesc.value;
-    c.semblance.ascended.auraCost = Math.max(0, Number(els.dmAscendedCost.value) || 0);
+    map.forEach(([key, active, activeDesc, passiveName, passiveDesc, cost]) => {
+        c.semblance[key].active = active.value;
+        c.semblance[key].activeDescription = activeDesc.value;
+        c.semblance[key].passiveName = passiveName.value;
+        c.semblance[key].passiveDescription = passiveDesc.value;
+        c.semblance[key].auraCost = Math.max(0, Number(cost.value) || 0);
+    });
 
     c.semblance.unlocked.first = els.unlockFirst.checked;
     c.semblance.unlocked.second = els.unlockSecond.checked;
@@ -1026,8 +1018,7 @@ function deleteCharacter() {
 
     const current = getCharacter();
     const name = current.name || `Character ${state.selectedCharacter + 1}`;
-    const confirmed = confirm(`Delete ${name}? This cannot be undone.`);
-    if (!confirmed) return;
+    if (!confirm(`Delete ${name}? This cannot be undone.`)) return;
 
     state.characters.splice(state.selectedCharacter, 1);
 
@@ -1059,7 +1050,6 @@ function addDustSpell() {
 
     els.dustSpellName.value = "";
     els.dustSpellDescription.value = "";
-
     saveState();
     render();
 }
@@ -1069,8 +1059,7 @@ function useDustSpell(spellId) {
     const spell = c.dustSpells.find((s) => s.id === spellId);
     if (!spell) return;
 
-    const amount = c.dustInventory[spell.type] || 0;
-    if (amount < 1) {
+    if ((c.dustInventory[spell.type] || 0) < 1) {
         alert(`Not enough ${spell.type}.`);
         return;
     }
@@ -1121,6 +1110,7 @@ function createTechniqueForSelectedPlayer() {
 
 function openDmOverlay() {
     els.dmOverlay.classList.remove("hidden");
+
     if (!dmUnlocked) {
         els.dmLoginPanel.classList.remove("hidden");
         els.dmFullscreenPanel.classList.add("hidden");
@@ -1153,6 +1143,7 @@ function unlockDm() {
     els.dmFullscreenPanel.classList.remove("hidden");
     renderDmSemblanceFields();
     renderDmTechniqueDatabase();
+    renderThemeFields();
 }
 
 function exportSaveData() {
@@ -1160,9 +1151,9 @@ function exportSaveData() {
         const dataStr = JSON.stringify(state, null, 2);
         const blob = new Blob([dataStr], { type: "application/json" });
         const url = URL.createObjectURL(blob);
-
         const link = document.createElement("a");
         const date = new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-");
+
         link.href = url;
         link.download = `rwby-dnd-save-${date}.json`;
         link.style.display = "none";
@@ -1175,7 +1166,7 @@ function exportSaveData() {
             link.remove();
         }, 100);
     } catch (err) {
-        console.error("Export failed:", err);
+        console.error(err);
         alert("Could not export save data.");
     }
 }
@@ -1199,15 +1190,12 @@ function importSaveDataFromFile(file) {
             render();
             alert("Save imported successfully.");
         } catch (err) {
-            console.error("Import failed:", err);
+            console.error(err);
             alert("Could not import that file.");
         }
     };
 
-    reader.onerror = () => {
-        alert("Could not read that file.");
-    };
-
+    reader.onerror = () => alert("Could not read that file.");
     reader.readAsText(file);
 }
 
@@ -1245,35 +1233,33 @@ function bindInputs() {
     els.statsGrid.addEventListener("click", (e) => {
         const btn = e.target.closest("button");
         if (!btn) return;
-        const stat = btn.dataset.stat;
-        const action = btn.dataset.action;
-        if (!stat || !action) return;
-        if (action === "plus") adjustStat(stat, 1);
-        if (action === "minus") adjustStat(stat, -1);
+
+        if (btn.dataset.action === "plus") adjustStat(btn.dataset.stat, 1);
+        if (btn.dataset.action === "minus") adjustStat(btn.dataset.stat, -1);
     });
 
     els.rollHpBtn.addEventListener("click", rollHp);
     els.rollAuraBtn.addEventListener("click", rollAura);
     els.restoreHpBtn.addEventListener("click", restoreHp);
     els.restoreAuraBtn.addEventListener("click", restoreAura);
-    els.saveSemblanceBtn.addEventListener("click", saveSemblanceFromDm);
-    els.saveCharacterStateBtn.addEventListener("click", saveCharacterState);
+
     els.addCharacterBtn.addEventListener("click", addCharacter);
     els.deleteCharacterBtn.addEventListener("click", deleteCharacter);
-    els.addDustSpellBtn.addEventListener("click", addDustSpell);
-    els.createTechniqueBtn.addEventListener("click", createTechniqueForSelectedPlayer);
-
     els.toggleReserveBtn.addEventListener("click", () => {
         state.showReserve = !state.showReserve;
         saveState();
         render();
     });
-
     els.toggleDeadBtn.addEventListener("click", () => {
         state.showDead = !state.showDead;
         saveState();
         render();
     });
+
+    els.addDustSpellBtn.addEventListener("click", addDustSpell);
+    els.createTechniqueBtn.addEventListener("click", createTechniqueForSelectedPlayer);
+    els.saveSemblanceBtn.addEventListener("click", saveSemblanceFromDm);
+    els.saveCharacterStateBtn.addEventListener("click", saveCharacterState);
 
     els.openDmOverlayBtn.addEventListener("click", openDmOverlay);
     els.dmLoginBtn.addEventListener("click", unlockDm);
@@ -1284,28 +1270,37 @@ function bindInputs() {
         if (e.key === "Enter") unlockDm();
     });
 
-    if (els.exportDataBtn) {
-        els.exportDataBtn.addEventListener("click", exportSaveData);
-    } else {
-        console.error("exportDataBtn not found in HTML");
-    }
+    els.exportDataBtn.addEventListener("click", exportSaveData);
+    els.importDataBtn.addEventListener("click", () => els.importDataInput.click());
+    els.importDataInput.addEventListener("change", (e) => {
+        importSaveDataFromFile(e.target.files?.[0]);
+        e.target.value = "";
+    });
 
-    if (els.importDataBtn && els.importDataInput) {
-        els.importDataBtn.addEventListener("click", () => {
-            els.importDataInput.click();
-        });
+    els.saveThemeBtn.addEventListener("click", saveThemeFromDm);
+    els.resetThemeBtn.addEventListener("click", resetTheme);
 
-        els.importDataInput.addEventListener("change", (e) => {
-            const file = e.target.files?.[0];
-            importSaveDataFromFile(file);
-            e.target.value = "";
+    [
+        els.themeBgColor,
+        els.themePanelColor,
+        els.themeAccentColor,
+        els.themeAccentTwoColor,
+        els.themeAuraColor,
+        els.themeTextColor
+    ].forEach((input) => {
+        input.addEventListener("input", () => {
+            state.theme = {
+                bg: els.themeBgColor.value,
+                panel: els.themePanelColor.value,
+                accent: els.themeAccentColor.value,
+                accentTwo: els.themeAccentTwoColor.value,
+                aura: els.themeAuraColor.value,
+                text: els.themeTextColor.value
+            };
+            applyTheme();
         });
-    } else {
-        console.error("importDataBtn or importDataInput not found in HTML");
-    }
+    });
 }
 
 bindInputs();
-console.log("script loaded");
-console.log("export button:", els.exportDataBtn);
 render();
