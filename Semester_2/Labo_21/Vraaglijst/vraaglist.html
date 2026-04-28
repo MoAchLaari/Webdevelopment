@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="nl">
+
+<head>
+    <title>Oefening</title>
+    <link rel="stylesheet" type="text/css" href="vraaglist.css">
+</head>
+
+<body>
+<h1>Opdracht - demo storage 1 - globale objecten</h1>
+<div class="numbered">
+    <p>
+        Blijft de data behouden als je de pagina herlaadt?
+        <span class="nee">Nee</span><br>
+        <small>Globale variabelen bestaan alleen zolang de pagina geladen is. Bij refresh wordt alles opnieuw gestart.</small>
+    </p>
+
+    <p>
+        Blijft de data behouden als je het tabblad sluit en de pagina opnieuw opent?
+        <span class="nee">Nee</span><br>
+        <small>Als je het tabblad sluit, verdwijnt de JavaScript-data uit het geheugen.</small>
+    </p>
+
+    <p>
+        Gebruiken twee tabbladen die dezelfde pagina tonen, dezelfde data?
+        <span class="nee">Nee</span><br>
+        <small>Elk tabblad laadt zijn eigen versie van de pagina met eigen globale variabelen.</small>
+    </p>
+</div>
+
+<h1>Opdracht - demo storage 2 - session storage</h1>
+<div class="numbered">
+    <p>
+        Blijft de data behouden als je het tabblad sluit en de pagina opnieuw opent?
+        <span class="nee">Nee</span><br>
+        <small>Session storage is gekoppeld aan één tabblad. Als dat tabblad sluit, wordt de data verwijderd.</small>
+    </p>
+
+    <p>
+        Blijft de data behouden als je de pagina herlaadt?
+        <span class="ja">Ja</span><br>
+        <small>Bij een refresh blijft session storage bestaan, zolang hetzelfde tabblad open blijft.</small>
+    </p>
+
+    <p>
+        Gebruiken twee tabbladen die dezelfde pagina tonen, dezelfde data?
+        <span class="nee">Nee</span><br>
+        <small>Elk tabblad heeft zijn eigen session storage.</small>
+    </p>
+
+    <p>
+        Denk je dat een andere pagina, andere file of url, aan de data geraakt als je ze in hetzelfde tabblad opent?
+        <span class="ja">Ja</span><br>
+        <small>Ja, als die pagina van dezelfde website/origin komt. Session storage wordt gedeeld binnen hetzelfde tabblad en dezelfde origin.</small>
+    </p>
+</div>
+
+<h1>Opdracht - demo storage 3 - local storage</h1>
+<div class="numbered">
+    <p>
+        Blijft de data behouden als je het tabblad sluit en de pagina opnieuw opent?
+        <span class="ja">Ja</span><br>
+        <small>Local storage blijft opgeslagen in de browser, ook na het sluiten van een tabblad.</small>
+    </p>
+
+    <p>
+        Blijft de data behouden als je de pagina herlaadt?
+        <span class="ja">Ja</span><br>
+        <small>Een refresh verwijdert local storage niet.</small>
+    </p>
+
+    <p>
+        Blijft de data behouden als je de browser afsluit, opnieuw start en de pagina weer opent?
+        <span class="ja">Ja</span><br>
+        <small>Local storage blijft bewaard tot je het zelf verwijdert of de browserdata wist.</small>
+    </p>
+
+    <p>
+        Blijft de data behouden als je de pagina in een andere browser opent?
+        <span class="nee">Nee</span><br>
+        <small>Elke browser heeft zijn eigen local storage. Chrome deelt dit bijvoorbeeld niet met Firefox.</small>
+    </p>
+
+    <p>
+        Wordt de data gedeeld door verschillende tabbladen als je de pagina meermaals opent?
+        <span class="ja">Ja</span><br>
+        <small>Local storage wordt gedeeld tussen tabbladen van dezelfde website/origin.</small>
+    </p>
+</div>
+</body>
+
+</html>
