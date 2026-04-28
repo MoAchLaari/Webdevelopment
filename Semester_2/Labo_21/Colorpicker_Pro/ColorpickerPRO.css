@@ -255,9 +255,6 @@ html, body {
     min-height: 40px;
 }
 
-/*
-  Each saved color appears as a swatch tile.
-*/
 .swatch-item {
     width: 76px;
     height: 76px;
@@ -292,9 +289,6 @@ html, body {
     cursor: pointer;
 }
 
-/* =========================
-   RESPONSIVE ADJUSTMENTS
-   ========================= */
 
 @media (max-width: 720px) {
     .container {
