@@ -1,11 +1,4 @@
-/* =========================
-   GLOBAL RESET / PAGE SETUP
-   ========================= */
 
-/*
-  Make sure the page really fills the full viewport.
-  This is important because the animated background is fixed to the screen.
-*/
 html, body {
     margin: 0;
     padding: 0;
@@ -18,14 +11,7 @@ html, body {
             linear-gradient(135deg, #0f172a, #1e293b 55%, #0b1120);
 }
 
-/* =========================
-   BACKGROUND BLOBS LAYER
-   ========================= */
 
-/*
-  This layer covers the entire screen and sits behind the app.
-  pointer-events: none keeps it from blocking clicks.
-*/
 #background-blobs {
     position: fixed;
     inset: 0;
@@ -34,11 +20,7 @@ html, body {
     pointer-events: none;
 }
 
-/*
-  Each blob is a soft blurred circle.
-  We DO NOT use translate(-50%, -50%) here, because that was one of the
-  reasons blobs appeared shifted off-screen or biased to one side.
-*/
+
 .blob {
     position: absolute;
     border-radius: 50%;
@@ -48,13 +30,7 @@ html, body {
     will-change: transform;
 }
 
-/*
-  We use three layers with different animation speeds.
-  This creates a depth effect:
-  - layer-1 = far away / slow
-  - layer-2 = medium
-  - layer-3 = closer / faster
-*/
+
 .layer-1 {
     animation: floatSlow 34s infinite ease-in-out alternate;
 }
@@ -67,11 +43,7 @@ html, body {
     animation: floatFast 16s infinite ease-in-out alternate;
 }
 
-/*
-  The animations move blobs in different directions.
-  Because the starting top/left are set in JS across the entire viewport,
-  these animations make them drift naturally instead of staying stuck.
-*/
+
 @keyframes floatSlow {
     0%   { transform: translate3d(0, 0, 0) scale(1); }
     50%  { transform: translate3d(140px, -110px, 0) scale(1.08); }
@@ -90,14 +62,7 @@ html, body {
     100% { transform: translate3d(-200px, -140px, 0) scale(0.88); }
 }
 
-/* =========================
-   APP LAYER
-   ========================= */
 
-/*
-  The app is placed above the background with z-index: 1.
-  min-height: 100vh centers it across the full screen vertically.
-*/
 .app {
     position: relative;
     z-index: 1;
@@ -113,14 +78,7 @@ html, body {
     box-sizing: border-box;
 }
 
-/* =========================
-   MAIN PICKER CONTAINER
-   ========================= */
 
-/*
-  A glassmorphism style panel.
-  The semi-transparent background allows the animated colors to be visible behind it.
-*/
 .container {
     display: flex;
     align-items: center;
@@ -138,9 +96,6 @@ html, body {
             inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 
-/* =========================
-   SLIDERS
-   ========================= */
 
 .sliders {
     display: flex;
@@ -149,9 +104,7 @@ html, body {
     width: min(320px, 70vw);
 }
 
-/*
-  Each slider row contains the input and the numeric label.
-*/
+
 .slider-row {
     display: flex;
     align-items: center;
@@ -164,9 +117,6 @@ html, body {
     cursor: pointer;
 }
 
-/*
-  Fixed width keeps the labels aligned nicely.
-*/
 .slider-label {
     width: 88px;
     display: flex;
@@ -175,10 +125,6 @@ html, body {
     font-size: 0.95rem;
     font-weight: 600;
 }
-
-/* =========================
-   COLOR PREVIEW BOX
-   ========================= */
 
 #color-box {
     width: 170px;
@@ -214,10 +160,6 @@ html, body {
     color: white;
     mix-blend-mode: difference;
 }
-
-/* =========================
-   BUTTON + SWATCHES
-   ========================= */
 
 #swatch-group {
     display: flex;
