@@ -1,24 +1,27 @@
 <!DOCTYPE html>
-<html lang="nl">
+<html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <link rel="stylesheet" href="StartPage.css">
+    <title>Oefening</title>
+    <link rel="stylesheet" type="text/css" href="StartPage.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Start Page</title>
 </head>
+
 <body>
-    <div id="head">
-        <h1>My Internet Start Page</h1>
-        <label for="command-input"></label><input id="command-input" placeholder="Enter commando">
-        <p> Please begin your command with "/[Character] [Zoekopdracht]</p>
-        <button id="go-button">Begin</button>
+<div id="head">
+    <h1>My Internet Start Page</h1>
+    <input id="command-input" placeholder="Enter commando">
+    <p> Start your commando with "/[character] {zoekopdracht}</p>
+    <button id="go-button">GO!</button>
+</div>
+<div>
+    <div id="title-bar">
+        <h1>History</h1>
+        <button id="change-sort">Sort: A → Z</button>
     </div>
-    <div>
-        <div id="title-bar">
-            <h1>History</h1>
-        </div>
-        <div id="cards-container"></div>
-    </div>
-<script type="text/javascript" charset="utf-8" src="StartPage.js"></script>
+    <div id="cards-container"></div>
+</div>
+<script src="StartPage.js"></script>
 </body>
+
 </html>
