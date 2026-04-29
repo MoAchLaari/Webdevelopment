@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="nl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Internet Start Page</title>
+    <link rel="stylesheet" href="StartPage.css">
+</head>
+
+<body>
+<main class="page">
+
+    <!-- Top section with title and command input -->
+    <section class="hero">
+        <div class="hero-text">
+            <p class="eyebrow">Custom Search Launcher</p>
+            <h1>My Internet Start Page</h1>
+            <p class="subtitle">
+                Type a command like <strong>/g cats</strong> or <strong>/y music</strong> and press Begin.
+            </p>
+        </div>
+
+        <!-- Form makes Enter work naturally -->
+        <form id="search-form" class="command-box">
+            <label for="command-input">Command</label>
+
+            <div class="input-row">
+                <input id="command-input" type="text" placeholder="/g Webdev">
+                <button id="go-button" type="submit">Begin</button>
+            </div>
+
+            <div class="command-help">
+                <span>/g Google</span>
+                <span>/y YouTube</span>
+                <span>/x X</span>
+                <span>/i Instagram</span>
+                <span>/d DuckDuckGo</span>
+                <span>/t TikTok</span>
+            </div>
+        </form>
+    </section>
+
+    <!-- History section -->
+    <section class="history-section">
+        <div id="title-bar">
+            <div>
+                <p class="eyebrow">Saved Searches</p>
+                <h2>History</h2>
+            </div>
+
+            <div class="history-actions">
+                <button id="change-sort" class="secondary-button" type="button">
+                    Sort: A → Z
+                </button>
+
+                <button id="clear-history" class="danger-button" type="button">
+                    Clear
+                </button>
+            </div>
+        </div>
+
+        <div id="cards-container"></div>
+
+        <p id="empty-state" class="empty-state">
+            No searches yet. Try something like <strong>/g javascript localStorage</strong>.
+        </p>
+    </section>
+
+</main>
+
+<script src="StartPage.js"></script>
+</body>
+
+</html>
