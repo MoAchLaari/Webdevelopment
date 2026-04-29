@@ -130,12 +130,6 @@ class StartPage {
                 buildUrl: (query) => `https://www.instagram.com/explore/tags/${encodeURIComponent(query.replace(/\s+/g, ""))}/`
             },
             {
-                key: "d",
-                name: "DuckDuckGo",
-                color: "#de5833",
-                buildUrl: (query) => `https://duckduckgo.com/?q=${encodeURIComponent(query)}`
-            },
-            {
                 key: "t",
                 name: "TikTok",
                 color: "#fe2c55",

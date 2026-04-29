@@ -69,7 +69,6 @@ class StartPage {
             { key: "y", name: "Youtube", color: "#FF0000", function: (i) => `https://www.youtube.com/results?search_query=${i.replace(" ", "+")}` },
             { key: "x", name: "X", color: "#1d9bf0", function: (i) => `https://x.com/search?q=${i.replace(" ", "%20")}` },
             { key: "i", name: "Instagram", color: "#fc0077", function: (i) => `https://www.instagram.com/explore/tags/${i.replace(" ", "")}/` },
-            { key: "d", name: "DuckDuckGo", color: "#de5833", function: (i) => `https://duckduckgo.com/?t=h_&q=${i.replace(" ", "+")}` },
             { key: "t", name: "TikTok", color: "#fe2c55", function: (i) => `https://www.tiktok.com/search?q=${i.replace(" ", "%20")}` },
         ];
         this.sortAscending = this.loadSortDirection();
