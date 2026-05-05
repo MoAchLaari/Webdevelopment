@@ -1,27 +1,50 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <title>Oefening</title>
-    <link rel="stylesheet" type="text/css" href="StartPage.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <title>My Internet Start Page</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+          crossorigin="anonymous">
+
+    <link rel="stylesheet" href="StartPage.css">
 </head>
 
 <body>
-<div id="head">
-    <h1>My Internet Start Page</h1>
-    <input id="command-input" placeholder="Enter commando">
-    <p> Start your commando with "/[character] {zoekopdracht}</p>
-    <button id="go-button">GO!</button>
-</div>
-<div>
-    <div id="title-bar">
-        <h1>History</h1>
-        <button id="change-sort">Sort: A → Z</button>
+
+<div class="container py-5">
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h1 class="mb-3">My Internet Start Page</h1>
+
+            <div class="row g-2">
+                <div class="col-12 col-md-10">
+                    <input id="input"
+                           class="form-control"
+                           type="text"
+                           placeholder="Zoekopdracht, bv. /g webdesign">
+                </div>
+
+                <div class="col-12 col-md-2">
+                    <button id="btn" class="btn btn-primary w-100">
+                        GO!
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
-    <div id="cards-container"></div>
+
+    <h1 class="mb-3">History</h1>
+
+    <div id="swatches" class="row g-3"></div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous"></script>
+
 <script src="StartPage.js"></script>
 </body>
-
 </html>

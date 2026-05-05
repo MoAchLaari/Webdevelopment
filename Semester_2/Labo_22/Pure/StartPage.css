@@ -1,159 +1,46 @@
 body {
+    background-color: #f4f6f8;
     font-family: Arial, sans-serif;
-    padding: 0 20px;
-    max-width: 100%;
-    box-sizing: border-box;
-    margin: 0 auto;
 }
 
-@media (min-width: 768px) {
-    body {
-        padding: 0 100px;
-    }
-}
-
-@media (min-width: 1200px) {
-    body {
-        padding: 0 300px;
-    }
-}
-
-
-.card {
-    border-radius: 5px;
-    padding: 15px;
-    padding-bottom: 30px;
-    color: white;
-    box-sizing: content-box;
-}
-
-.card a {
-    mix-blend-mode: difference;
-    background-color: rgb(255, 255, 255);
-    color: rgb(197, 197, 197);
-    padding: 10px;
-    border-radius: 5px;
-    width: 800px;
-    text-decoration: none;
-}
-
-.card p {
-    margin-bottom: 25px;
-    margin-top: 5px;
-    font-size: x-large;
-}
-
-#cards-container {
-    display: grid;
-    grid-template-columns: auto auto auto;
-    gap: 15px;
-
-}
-
-h2 {
-    margin-bottom: 5px;
-    margin-top: 5px;
-    font-weight: bolder;
-}
-
-#head {
-    display: flex;
-    flex-direction: column;
-}
-
-#head p {
-    color: gray;
-    margin-top: 3px;
-}
-
-#head input {
-    padding: 5px;
-    height: 30px;
-    font-size: 17px;
-    font-weight: 500;
-}
-
-#go-button {
-    background-color: #208637;
-    color: white;
-    padding: 10px;
-    width: 100%;
+.history-card {
     border: none;
-    border-radius: 5px;
-    font-weight: bold;
-    font-size: large;
-}
-
-#go-button:hover {
-    background-color: #40a156;
-}
-
-#title-bar {
-    display: flex;
-    padding: 25px 0;
-
-    justify-content: space-between;
-}
-
-#title-bar h1 {
-    margin: 0;
-}
-
-/* CSS for the Popup class */
-.popup {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: #fff;
-    padding: 30px;
-    border-radius: 10px;
-    z-index: 1000;
-    font-size: large;
-}
-
-.popup-header {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 10px;
-}
-
-.popup-title {
-    margin: 0;
-    font-size: 30px;
-    font-weight: bold;
-}
-
-.close-btn {
-    background: red;
-    border: none;
-    font-size: 20px;
-    cursor: pointer;
     color: white;
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
+    min-height: 180px;
+}
+
+.history-card .card-title {
+    font-weight: bold;
+    font-size: 1.4rem;
+}
+
+.history-card .card-text {
+    word-break: break-word;
+}
+
+.history-card .btn {
+    background-color: white;
+    border: none;
+    color: black;
     font-weight: bold;
 }
 
-
-.popup-no-title .close-btn {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    font-size: 20px;
+.history-card .btn:hover {
+    background-color: #eeeeee;
 }
 
-.popup-background {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 999;
+.card-google {
+    background-color: #4285F4;
+}
+
+.card-youtube {
+    background-color: #FF0000;
+}
+
+.card-x {
+    background-color: #1DA1F2;
+}
+
+.card-instagram {
+    background: linear-gradient(135deg, #feda75, #fa7e1e, #d62976, #962fbf, #4f5bd5);
 }
