@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mana DnD Sheets</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="background-grid"></div>
+
+  <div class="app-shell">
+    <aside class="sidebar card">
+      <div class="brand-box">
+        <div class="eyebrow">Shared Table</div>
+        <h1>Mana DnD</h1>
+        <p>Shared character sheets for your party.</p>
+        <div id="syncStatus" class="sync-status">Loading...</div>
+      </div>
+
+      <section class="side-block">
+        <h2>Characters</h2>
+        <div class="button-stack">
+          <button id="addCharacterBtn" class="btn primary" type="button">Add Character</button>
+          <button id="toggleReserveBtn" class="btn ghost" type="button">Show Reserve</button>
+          <button id="toggleDeadBtn" class="btn ghost" type="button">Show Dead</button>
+        </div>
+        <div id="characterList" class="character-list"></div>
+      </section>
+
+      <section class="side-block">
+        <h2>Save Transfer</h2>
+        <div class="button-stack">
+          <button id="exportBtn" class="btn primary" type="button">Export Save</button>
+          <button id="importBtn" class="btn ghost" type="button">Import Save</button>
+          <input id="importInput" type="file" accept=".json,application/json" hidden />
+        </div>
+      </section>
+
+      <section class="side-block">
+        <h2>Selected</h2>
+        <div class="mini-info"><span>Name</span><strong id="sideSelectedName">Character</strong></div>
+        <div class="mini-info"><span>State</span><strong id="sideSelectedState">Active</strong></div>
+        <div class="mini-info"><span>Level</span><strong id="sideSelectedLevel">1</strong></div>
+        <div class="mini-info"><span>Prof.</span><strong id="sideSelectedProf">+2</strong></div>
+      </section>
+    </aside>
+
+    <main class="main-area">
+      <header class="top-card card">
+        <div class="name-zone">
+          <div class="eyebrow">Current Sheet</div>
+          <input id="charName" class="big-name-input" type="text" placeholder="Character Name" />
+        </div>
+
+        <div class="resource-minis">
+          <div class="mini-resource hp"><span>Health</span><strong id="topHp">0 / 0</strong></div>
+          <div class="mini-resource mana"><span>Mana</span><strong id="topMana">0 / 0</strong></div>
+          <div class="mini-resource"><span>AC</span><strong id="topAc">10</strong></div>
+          <div class="mini-resource"><span>PB</span><strong id="topProf">+2</strong></div>
+        </div>
+      </header>
+
+      <nav class="tabs card">
+        <button class="tab active" type="button" data-tab="overview">Overview</button>
+        <button class="tab" type="button" data-tab="stats">Stats</button>
+        <button class="tab" type="button" data-tab="magic">Magic</button>
+        <button class="tab" type="button" data-tab="weapons">Weapons</button>
+        <button class="tab" type="button" data-tab="inventory">Inventory</button>
+        <button class="tab" type="button" data-tab="notes">Notes</button>
+        <button class="tab" type="button" data-tab="style">Style</button>
+      </nav>
+
+      <section id="tab-overview" class="tab-panel active">
+        <div class="two-column">
+          <section class="card panel-block">
+            <h2>Identity</h2>
+            <div class="form-grid">
+              <label>Level<select id="charLevel"></select></label>
+              <label>Class<input id="charClass" type="text" placeholder="Fighter, Wizard, Rogue..." /></label>
+              <label>Ancestry / Race<input id="charRace" type="text" placeholder="Human, Elf, Faunus..." /></label>
+              <label>Background<input id="charBackground" type="text" placeholder="Scholar, Soldier..." /></label>
+              <label>Age<input id="charAge" type="text" placeholder="Age" /></label>
+              <label>Alignment / Vibe<input id="charVibe" type="text" placeholder="Chaotic Good, Tired Menace..." /></label>
+            </div>
+          </section>
+
+          <section class="card panel-block">
+            <h2>Character Image</h2>
+            <div id="portraitPreview" class="portrait-preview"><span>No Image</span></div>
+            <div class="image-actions">
+              <input id="imageUrlInput" type="text" placeholder="Paste image URL..." />
+              <button id="saveImageUrlBtn" class="btn primary" type="button">Use URL</button>
+              <button id="uploadImageBtn" class="btn ghost" type="button">Upload Image</button>
+              <input id="imageUploadInput" type="file" accept="image/*" hidden />
+              <button id="clearImageBtn" class="btn danger" type="button">Clear</button>
+            </div>
+          </section>
+
+          <section class="card panel-block">
+            <h2>Resources</h2>
+
+            <div class="resource-box">
+              <div class="resource-head"><span>Health</span><strong id="hpText">0 / 0</strong></div>
+              <div class="bar"><div id="hpBar" class="bar-fill hp-fill"></div></div>
+              <div class="resource-inputs">
+                <input id="currentHp" type="number" placeholder="Current HP" />
+                <input id="maxHp" type="number" placeholder="Max HP" />
+              </div>
+            </div>
+
+            <div class="resource-box">
+              <div class="resource-head"><span>Mana Pool</span><strong id="manaText">0 / 0</strong></div>
+              <div class="bar"><div id="manaBar" class="bar-fill mana-fill"></div></div>
+              <div class="resource-inputs">
+                <input id="currentMana" type="number" placeholder="Current Mana" />
+                <input id="maxMana" type="number" placeholder="Max Mana" />
+              </div>
+            </div>
+
+            <div class="form-grid three">
+              <label>Armor Class<input id="armorClass" type="number" /></label>
+              <label>Speed<input id="speed" type="text" placeholder="30 ft" /></label>
+              <label>Initiative<input id="initiative" type="text" placeholder="+0" /></label>
+            </div>
+
+            <div class="actions">
+              <button id="rollHpBtn" class="btn primary" type="button">Roll HP</button>
+              <button id="rollManaBtn" class="btn mana-btn" type="button">Roll Mana</button>
+              <button id="restoreHpBtn" class="btn ghost" type="button">Restore HP</button>
+              <button id="restoreManaBtn" class="btn ghost" type="button">Restore Mana</button>
+            </div>
+          </section>
+
+          <section class="card panel-block">
+            <h2>Backstory</h2>
+            <textarea id="backstory" placeholder="Backstory, goals, problems, people they owe money to..."></textarea>
+          </section>
+
+          <section class="card panel-block wide">
+            <h2>Level Benefits</h2>
+            <div id="levelBenefits" class="level-benefits"></div>
+          </section>
+        </div>
+      </section>
+
+      <section id="tab-stats" class="tab-panel">
+        <section class="card panel-block">
+          <h2>Ability Scores</h2>
+          <p class="hint">Type the ability score. The modifier updates automatically.</p>
+          <div id="statsGrid" class="stats-grid"></div>
+        </section>
+
+        <section class="card panel-block gap-top">
+          <h2>Skills & Saving Throws</h2>
+          <p class="hint">Small orb = proficiency. Big orb = expertise. Expertise doubles proficiency.</p>
+          <div id="skillsGrid" class="skills-grid"></div>
+        </section>
+      </section>
+
+      <section id="tab-magic" class="tab-panel">
+        <div class="two-column">
+          <section class="card panel-block">
+            <h2>Magic</h2>
+            <div class="form-grid">
+              <label>Magic Name<input id="magicName" type="text" placeholder="Fire Magic, Archive Magic..." /></label>
+              <label>Magic Type
+                <select id="magicType">
+                  <option value="Sense">Sense</option>
+                  <option value="Power">Power</option>
+                  <option value="Agility">Agility</option>
+                </select>
+              </label>
+              <label>Spellcasting Ability<select id="magicAbility"></select></label>
+            </div>
+            <textarea id="magicDescription" placeholder="Describe how the magic works..."></textarea>
+            <div class="actions"><button id="spellCheckBtn" class="btn mana-btn" type="button">Roll Spell Check</button></div>
+          </section>
+
+          <section class="card panel-block">
+            <h2>Magic Type Effects</h2>
+            <div id="magicEffectBox" class="effect-list"></div>
+          </section>
+
+          <section class="card panel-block">
+            <h2>Create Spell</h2>
+            <div class="form-grid">
+              <label>Spell Name<input id="spellNameInput" type="text" placeholder="Crimson Lance..." /></label>
+              <label>Mana Cost<input id="spellCostInput" type="number" min="0" placeholder="5" /></label>
+            </div>
+            <label>Spell Effect<textarea id="spellEffectInput" placeholder="Damage, range, bonus, condition, etc."></textarea></label>
+            <div class="actions"><button id="addSpellBtn" class="btn mana-btn" type="button">Add Spell</button></div>
+          </section>
+
+          <section class="card panel-block">
+            <h2>Known Spells</h2>
+            <div id="spellList" class="spell-list"></div>
+          </section>
+        </div>
+      </section>
+
+      <section id="tab-weapons" class="tab-panel">
+        <div class="two-column">
+          <section class="card panel-block">
+            <h2>Weapon Catalogue</h2>
+            <div id="weaponCatalogue" class="weapon-list"></div>
+          </section>
+          <section class="card panel-block">
+            <h2>Character Weapons</h2>
+            <div id="characterWeapons" class="weapon-list"></div>
+          </section>
+        </div>
+      </section>
+
+      <section id="tab-inventory" class="tab-panel">
+        <section class="card panel-block">
+          <h2>Inventory</h2>
+          <textarea id="inventoryText" placeholder="Items, money, tools, trophies, etc."></textarea>
+        </section>
+      </section>
+
+      <section id="tab-notes" class="tab-panel">
+        <section class="card panel-block">
+          <h2>Notes</h2>
+          <textarea id="notesText" placeholder="Session notes, NPC names, plans..."></textarea>
+        </section>
+      </section>
+
+      <section id="tab-style" class="tab-panel">
+        <section class="card panel-block">
+          <h2>Appearance</h2>
+          <div class="form-grid three">
+            <label>Background<input id="themeBg" type="color" /></label>
+            <label>Card Color<input id="themeCard" type="color" /></label>
+            <label>Main Highlight<input id="themeAccent" type="color" /></label>
+            <label>Mana Highlight<input id="themeMana" type="color" /></label>
+            <label>Text Color<input id="themeText" type="color" /></label>
+            <label>Soft Highlight<input id="themeSoft" type="color" /></label>
+          </div>
+          <div class="actions">
+            <button id="saveThemeBtn" class="btn primary" type="button">Save Theme</button>
+            <button id="resetThemeBtn" class="btn ghost" type="button">Reset Theme</button>
+          </div>
+        </section>
+
+        <section class="card panel-block gap-top">
+          <h2>Character State</h2>
+          <div class="actions">
+            <button id="setActiveBtn" class="btn primary" type="button">Set Active</button>
+            <button id="setReserveBtn" class="btn ghost" type="button">Set Reserve</button>
+            <button id="setDeadBtn" class="btn danger" type="button">Set Dead</button>
+            <button id="deleteCharacterBtn" class="btn danger" type="button">Delete Character</button>
+          </div>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
