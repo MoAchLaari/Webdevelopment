@@ -1,0 +1,145 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap');
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    background:#070707;
+    color:white;
+    font-family:Orbitron,sans-serif;
+    min-height:100vh;
+}
+
+.background{
+    position:fixed;
+    inset:0;
+
+    background:
+            radial-gradient(
+                    circle at center,
+                    rgba(180,0,255,.2),
+                    transparent 60%
+            );
+
+    animation:pulse 4s infinite;
+}
+
+@keyframes pulse{
+    0%{opacity:.5;}
+    50%{opacity:1;}
+    100%{opacity:.5;}
+}
+
+header{
+    text-align:center;
+    padding:30px;
+}
+
+h1{
+    color:#d946ef;
+    font-size:3rem;
+
+    text-shadow:
+            0 0 15px #d946ef,
+            0 0 35px #d946ef;
+}
+
+#countdown{
+    margin-top:15px;
+    font-size:1.2rem;
+}
+
+.controls,
+.claim-form{
+    width:90%;
+    max-width:1000px;
+
+    margin:auto;
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+
+    justify-content:center;
+}
+
+input,
+select{
+    background:#111;
+
+    border:1px solid #444;
+
+    color:white;
+
+    padding:12px;
+    border-radius:8px;
+}
+
+button{
+    background:#a21caf;
+    color:white;
+
+    border:none;
+
+    padding:12px 18px;
+
+    border-radius:8px;
+
+    cursor:pointer;
+
+    transition:.3s;
+}
+
+button:hover{
+    transform:translateY(-3px);
+
+    box-shadow:
+            0 0 15px #d946ef;
+}
+
+#claims{
+    width:90%;
+    margin:40px auto;
+
+    display:grid;
+
+    grid-template-columns:
+    repeat(auto-fill,minmax(300px,1fr));
+
+    gap:20px;
+}
+
+.card{
+
+    background:#111;
+
+    border:1px solid #333;
+
+    border-radius:15px;
+
+    padding:20px;
+
+    transition:.3s;
+}
+
+.card:hover{
+    transform:translateY(-5px);
+
+    box-shadow:
+            0 0 20px rgba(217,70,239,.6);
+}
+
+.card h2{
+    color:#d946ef;
+    margin-bottom:10px;
+}
+
+.card p{
+    margin:6px 0;
+}
+
+.card a{
+    color:#60a5fa;
+}
